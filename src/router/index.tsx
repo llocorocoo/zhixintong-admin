@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/Layout';
 import AuthGuard from '@/components/AuthGuard';
 import Login from '@/pages/Login';
@@ -10,6 +10,8 @@ import AccountList from '@/pages/Account';
 import OrderList from '@/pages/Order';
 import TransactionList from '@/pages/Transaction';
 import Settings from '@/pages/Settings';
+import UserCenter from '@/pages/UserCenter';
+import Profile from '@/pages/UserCenter/Profile';
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
       { path: 'order', element: <OrderList /> },
       { path: 'transaction', element: <TransactionList /> },
       { path: 'settings', element: <AuthGuard roles={['admin']}><Settings /></AuthGuard> },
+      {
+        path: 'user-center',
+        element: <UserCenter />,
+        children: [
+          { index: true, element: <Navigate to="profile" replace /> },
+          { path: 'profile', element: <Profile /> },
+        ],
+      },
     ],
   },
 ]);

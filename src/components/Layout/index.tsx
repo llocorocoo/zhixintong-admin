@@ -13,27 +13,47 @@ import {
   LogoutOutlined,
   LinkOutlined,
   HomeOutlined,
+  IdcardOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 
 const { Header, Sider, Content } = Layout;
 
-const pageTitleMap: Record<string, string> = {
-  '/': '仪表盘',
-  '/channel': '渠道商管理',
-  '/channel/my': '我的推广',
-  '/account': '账号管理',
-  '/order': '订单管理',
-  '/transaction': '交易明细',
-  '/settings': '系统配置',
+interface BreadcrumbItem {
+  title: string;
+  parent?: string;
+}
+
+const breadcrumbMap: Record<string, BreadcrumbItem> = {
+  '/': { title: '仪表盘' },
+  '/channel': { title: '渠道商管理' },
+  '/channel/my': { title: '我的推广' },
+  '/account': { title: '账号管理' },
+  '/order': { title: '订单管理' },
+  '/transaction': { title: '交易明细' },
+  '/settings': { title: '系统配置' },
+  '/user-center': { title: '用户中心' },
+  '/user-center/profile': { title: '基本信息', parent: '/user-center' },
 };
 
+function getBreadcrumb(pathname: string): string[] {
+  const item = breadcrumbMap[pathname];
+  if (item) {
+    if (item.parent) {
+      const parentItem = breadcrumbMap[item.parent];
+      return parentItem ? [parentItem.title, item.title] : [item.title];
+    }
+    return [item.title];
+  }
+  if (pathname.startsWith('/channel/')) return ['渠道商管理', '渠道商详情'];
+  if (pathname.startsWith('/order/')) return ['订单管理', '订单详情'];
+  return [''];
+}
+
 function getPageTitle(pathname: string): string {
-  if (pageTitleMap[pathname]) return pageTitleMap[pathname];
-  if (pathname.startsWith('/channel/')) return '渠道商详情';
-  if (pathname.startsWith('/order/')) return '订单详情';
-  return '';
+  const crumbs = getBreadcrumb(pathname);
+  return crumbs[crumbs.length - 1];
 }
 
 const adminMenuItems: MenuProps['items'] = [
@@ -43,6 +63,7 @@ const adminMenuItems: MenuProps['items'] = [
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
   { key: '/settings', icon: <SettingOutlined />, label: '系统配置' },
+  { key: '/user-center', icon: <IdcardOutlined />, label: '用户中心' },
 ];
 
 const channelMenuItems: MenuProps['items'] = [
@@ -50,7 +71,18 @@ const channelMenuItems: MenuProps['items'] = [
   { key: '/channel/my', icon: <LinkOutlined />, label: '我的推广' },
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
+  { key: '/user-center', icon: <IdcardOutlined />, label: '用户中心' },
 ];
+
+function getSelectedKey(pathname: string): string {
+  if (pathname === '/') return '/';
+  if (pathname.startsWith('/user-center')) return '/user-center';
+  if (pathname.startsWith('/channel/my')) return '/channel/my';
+  if (pathname.startsWith('/channel')) return '/channel';
+  if (pathname.startsWith('/order')) return '/order';
+  if (pathname.startsWith('/transaction')) return '/transaction';
+  return '/' + pathname.split('/')[1];
+}
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -59,6 +91,7 @@ export default function AppLayout() {
   const { user, logout } = useAuth();
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : channelMenuItems;
+  const breadcrumbs = getBreadcrumb(location.pathname);
   const pageTitle = getPageTitle(location.pathname);
 
   const dropdownItems: MenuProps['items'] = [
@@ -86,7 +119,7 @@ export default function AppLayout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname === '/' ? '/' : '/' + location.pathname.split('/')[1] + (location.pathname.split('/')[2] === 'my' ? '/my' : '')]}
+          selectedKeys={[getSelectedKey(location.pathname)]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
         />
@@ -110,7 +143,12 @@ export default function AppLayout() {
 
         <div className="app-breadcrumb">
           <HomeOutlined style={{ marginRight: 6 }} />
-          {pageTitle}
+          {breadcrumbs.map((crumb, i) => (
+            <span key={i}>
+              {i > 0 && <span style={{ margin: '0 4px' }}>&gt;&gt;</span>}
+              {crumb}
+            </span>
+          ))}
         </div>
 
         <Content className="app-content">
