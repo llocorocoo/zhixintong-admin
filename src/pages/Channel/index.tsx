@@ -94,12 +94,7 @@ export default function ChannelList() {
       render: (_: unknown, record: Channel) => (
         <Space>
           <a onClick={() => openEdit(record)}>编辑</a>
-          {record.type === 'pure' && (
-            <a onClick={() => navigate(`/channel/${record.id}`)}>推广链接</a>
-          )}
-          {record.type === 'oem' && (
-            <a onClick={() => navigate(`/channel/${record.id}`)}>域名/Logo</a>
-          )}
+          <a onClick={() => navigate(`/channel/${record.id}`)}>渠道详情</a>
           <Popconfirm
             title={`确定${record.status === 'active' ? '停用' : '启用'}该渠道商？`}
             onConfirm={() => handleToggle(record.id)}

@@ -28,7 +28,7 @@ interface BreadcrumbItem {
 const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/': { title: '仪表盘' },
   '/channel': { title: '渠道商管理' },
-  '/channel/my': { title: '我的推广' },
+  '/channel/my': { title: '渠道详情' },
   '/account': { title: '账号管理' },
   '/order': { title: '订单管理' },
   '/transaction': { title: '交易明细' },
@@ -73,7 +73,7 @@ const adminMenuItems: MenuProps['items'] = [
 
 const channelMenuItems: MenuProps['items'] = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
-  { key: '/channel/my', icon: <LinkOutlined />, label: '我的推广' },
+  { key: '/channel/my', icon: <LinkOutlined />, label: '渠道详情' },
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
   {
