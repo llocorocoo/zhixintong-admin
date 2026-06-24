@@ -51,11 +51,6 @@ function getBreadcrumb(pathname: string): string[] {
   return [''];
 }
 
-function getPageTitle(pathname: string): string {
-  const crumbs = getBreadcrumb(pathname);
-  return crumbs[crumbs.length - 1];
-}
-
 const adminMenuItems: MenuProps['items'] = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
   { key: '/channel', icon: <TeamOutlined />, label: '渠道商管理' },
@@ -108,7 +103,6 @@ export default function AppLayout() {
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : channelMenuItems;
   const breadcrumbs = getBreadcrumb(location.pathname);
-  const pageTitle = getPageTitle(location.pathname);
 
   const dropdownItems: MenuProps['items'] = [
     { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
@@ -169,7 +163,6 @@ export default function AppLayout() {
         </div>
 
         <Content className="app-content">
-          {pageTitle && <div className="page-title">{pageTitle}</div>}
           <Outlet />
         </Content>
       </Layout>
