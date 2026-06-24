@@ -110,7 +110,7 @@ export default function AppLayout() {
 
         <div className="app-breadcrumb">
           <HomeOutlined style={{ marginRight: 6 }} />
-          管理中心 &gt;&gt; {pageTitle}
+          {pageTitle}
         </div>
 
         <Content className="app-content">
