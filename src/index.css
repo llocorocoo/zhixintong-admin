@@ -65,6 +65,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   background: #2980b9 !important;
   border-radius: 0;
 }
+/* SubMenu 父级标题（如"用户中心"） */
+.app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title {
+  color: #ffffffcc !important;
+  margin: 2px 0;
+  border-radius: 0;
+}
+.app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  color: #fff !important;
+  background: #34495e !important;
+}
+.app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+  color: #ffffffcc;
+}
+/* SubMenu 展开后的子菜单 */
+.app-sider .ant-menu .ant-menu-sub {
+  background: #253646 !important;
+}
+.app-sider .ant-menu .ant-menu-sub .ant-menu-item {
+  padding-left: 48px !important;
+}
 
 /* ===== Breadcrumb 面包屑栏 ===== */
 .app-breadcrumb {
