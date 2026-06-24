@@ -1,11 +1,12 @@
 import { Card, Descriptions, QRCode, Input, message, Space, Tag } from 'antd';
 import { useAuth } from '@/store/useAuth';
-import { mockChannels } from '@/mock/data';
+import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
 
 export default function MyChannel() {
   const { user } = useAuth();
-  const channel = mockChannels.find((c) => c.id === user?.channelId);
+  const { channels } = useChannels();
+  const channel = channels.find((c) => c.id === user?.channelId);
 
   if (!channel) {
     return <div>未找到渠道信息</div>;
@@ -13,8 +14,6 @@ export default function MyChannel() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 24 }}>我的推广</h2>
-
       <Card title="渠道信息" style={{ marginBottom: 16 }}>
         <Descriptions column={2}>
           <Descriptions.Item label="渠道商名称">{channel.name}</Descriptions.Item>

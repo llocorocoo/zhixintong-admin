@@ -1,0 +1,181 @@
+/* ===== Global Reset ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+
+/* ===== Layout Header - 深蓝顶栏 ===== */
+.app-header {
+  height: 50px;
+  background: #1a2b4a !important;
+  padding: 0 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 50px;
+}
+.app-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-header .header-left .ant-btn { color: #ffffffcc; }
+.app-header .header-left .ant-btn:hover { color: #fff; }
+.app-header .header-user {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* ===== Sidebar - 深色侧边栏 ===== */
+.app-sider {
+  background: #2c3e50 !important;
+}
+.app-sider .ant-layout-sider-children {
+  background: #2c3e50;
+}
+.app-sider .sider-logo {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  background: #1a2b4a;
+}
+.app-sider .ant-menu {
+  background: #2c3e50 !important;
+  border-right: none;
+}
+.app-sider .ant-menu .ant-menu-item {
+  color: #ffffffcc;
+  margin: 2px 0;
+  border-radius: 0;
+}
+.app-sider .ant-menu .ant-menu-item:hover {
+  color: #fff;
+  background: #34495e !important;
+}
+.app-sider .ant-menu .ant-menu-item-selected {
+  color: #fff !important;
+  background: #2980b9 !important;
+  border-radius: 0;
+}
+
+/* ===== Breadcrumb 面包屑栏 ===== */
+.app-breadcrumb {
+  padding: 10px 20px;
+  background: #f0f2f5;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* ===== Content 内容区 ===== */
+.app-content {
+  margin: 0;
+  padding: 16px 20px;
+  background: #fff;
+  min-height: 280px;
+}
+
+/* ===== Search Bar 搜索栏 ===== */
+.search-bar {
+  background: #fafbfc;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+  padding: 20px 24px 12px;
+  margin-bottom: 16px;
+}
+.search-bar .ant-form-item {
+  margin-bottom: 12px;
+}
+.search-bar .ant-form-item-label > label {
+  color: #333;
+  font-size: 14px;
+}
+.search-bar .search-buttons {
+  text-align: center;
+  padding-top: 4px;
+}
+.search-bar .search-buttons .ant-btn {
+  min-width: 88px;
+  height: 36px;
+  margin: 0 8px;
+}
+
+/* ===== Table Toolbar 表格工具栏 ===== */
+.table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* ===== Table 表格样式 ===== */
+.ant-table {
+  border: 1px solid #e0e0e0;
+}
+.ant-table-thead > tr > th,
+.ant-table-thead > tr > td {
+  background: #4a6fa5 !important;
+  color: #fff !important;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #3d5f8f !important;
+  text-align: center;
+}
+.ant-table-thead > tr > th::before {
+  display: none !important;
+}
+.ant-table-tbody > tr > td {
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.ant-table-tbody > tr:hover > td {
+  background: #e8f0fe !important;
+}
+.ant-table-tbody > tr:nth-child(even) > td {
+  background: #fafbfc;
+}
+.ant-table-tbody > tr:nth-child(even):hover > td {
+  background: #e8f0fe !important;
+}
+
+/* Table action links */
+.ant-table-tbody a {
+  color: #2980b9;
+  margin: 0 4px;
+}
+.ant-table-tbody a:hover {
+  color: #1a5276;
+}
+
+/* ===== Pagination 分页 ===== */
+.ant-pagination {
+  margin-top: 16px !important;
+}
+.ant-pagination .ant-pagination-item-active {
+  background: #2980b9;
+  border-color: #2980b9;
+}
+.ant-pagination .ant-pagination-item-active a {
+  color: #fff;
+}
+
+/* ===== Page Title ===== */
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8e8;
+}

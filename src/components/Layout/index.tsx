@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Dropdown, theme, Avatar } from 'antd';
+import { Layout, Menu, Button, Dropdown, Avatar } from 'antd';
 import {
   TeamOutlined,
   UserOutlined,
@@ -12,11 +12,29 @@ import {
   MenuUnfoldOutlined,
   LogoutOutlined,
   LinkOutlined,
+  HomeOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 
 const { Header, Sider, Content } = Layout;
+
+const pageTitleMap: Record<string, string> = {
+  '/': '仪表盘',
+  '/channel': '渠道商管理',
+  '/channel/my': '我的推广',
+  '/account': '账号管理',
+  '/order': '订单管理',
+  '/transaction': '交易明细',
+  '/settings': '系统配置',
+};
+
+function getPageTitle(pathname: string): string {
+  if (pageTitleMap[pathname]) return pageTitleMap[pathname];
+  if (pathname.startsWith('/channel/')) return '渠道商详情';
+  if (pathname.startsWith('/order/')) return '订单详情';
+  return '';
+}
 
 const adminMenuItems: MenuProps['items'] = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
@@ -39,9 +57,9 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : channelMenuItems;
+  const pageTitle = getPageTitle(location.pathname);
 
   const dropdownItems: MenuProps['items'] = [
     { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
@@ -56,16 +74,17 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark">
-        <div style={{
-          height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: collapsed ? 16 : 18, fontWeight: 'bold', whiteSpace: 'nowrap',
-          overflow: 'hidden',
-        }}>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        width={200}
+        className="app-sider"
+      >
+        <div className="sider-logo">
           {collapsed ? '职信' : '职信通管理后台'}
         </div>
         <Menu
-          theme="dark"
           mode="inline"
           selectedKeys={[location.pathname === '/' ? '/' : '/' + location.pathname.split('/')[1] + (location.pathname.split('/')[2] === 'my' ? '/my' : '')]}
           items={menuItems}
@@ -73,26 +92,29 @@ export default function AppLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{
-          padding: '0 24px', background: colorBgContainer,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-          />
+        <Header className="app-header">
+          <div className="header-left">
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+            />
+          </div>
           <Dropdown menu={{ items: dropdownItems, onClick: onDropdownClick }} placement="bottomRight">
-            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar icon={<UserOutlined />} />
-              <span>{user?.name}</span>
+            <div className="header-user">
+              <Avatar size="small" icon={<UserOutlined />} style={{ background: '#2980b9' }} />
+              <span>欢迎您，{user?.name}</span>
             </div>
           </Dropdown>
         </Header>
-        <Content style={{
-          margin: 24, padding: 24, background: colorBgContainer,
-          borderRadius: borderRadiusLG, minHeight: 280,
-        }}>
+
+        <div className="app-breadcrumb">
+          <HomeOutlined style={{ marginRight: 6 }} />
+          管理中心 &gt;&gt; {pageTitle}
+        </div>
+
+        <Content className="app-content">
+          {pageTitle && <div className="page-title">{pageTitle}</div>}
           <Outlet />
         </Content>
       </Layout>

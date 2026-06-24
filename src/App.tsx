@@ -5,7 +5,16 @@ import router from '@/router';
 
 export default function App() {
   return (
-    <ConfigProvider locale={zhCN}>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        token: {
+          colorPrimary: '#2980b9',
+          borderRadius: 2,
+          fontSize: 14,
+        },
+      }}
+    >
       <RouterProvider router={router} />
     </ConfigProvider>
   );

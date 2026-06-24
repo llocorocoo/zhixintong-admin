@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Table, Tag, Input, Select, DatePicker } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Tag, Input, Select, DatePicker, Form, Button, Row, Col } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockTransactions, mockChannels } from '@/mock/data';
 import { TRANSACTION_TYPE_MAP } from '@/utils/constants';
+import type { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -16,12 +17,25 @@ export default function TransactionList() {
 
   const [search, setSearch] = useState('');
   const [channelFilter, setChannelFilter] = useState<string | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+  const [searchForm] = Form.useForm();
 
   const filtered = allTransactions.filter((t) => {
     if (search && !t.transactionNo.includes(search) && !t.orderNo.includes(search)) return false;
     if (channelFilter && t.channelId !== channelFilter) return false;
+    if (dateRange) {
+      const txDate = t.createdAt.split(' ')[0];
+      if (txDate < dateRange[0].format('YYYY-MM-DD') || txDate > dateRange[1].format('YYYY-MM-DD')) return false;
+    }
     return true;
   });
+
+  const handleReset = () => {
+    searchForm.resetFields();
+    setSearch('');
+    setChannelFilter(undefined);
+    setDateRange(null);
+  };
 
   const columns = [
     { title: '交易流水号', dataIndex: 'transactionNo', key: 'transactionNo' },
@@ -36,7 +50,7 @@ export default function TransactionList() {
     {
       title: '金额', dataIndex: 'amount', key: 'amount',
       render: (amount: number) => (
-        <span style={{ color: amount >= 0 ? '#52c41a' : '#ff4d4f' }}>
+        <span style={{ color: amount >= 0 ? '#27ae60' : '#e74c3c', fontWeight: 500 }}>
           {amount >= 0 ? '+' : ''}{amount.toFixed(2)} 元
         </span>
       ),
@@ -47,31 +61,57 @@ export default function TransactionList() {
 
   return (
     <>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <Input
-          placeholder="搜索流水号/订单号"
-          prefix={<SearchOutlined />}
-          style={{ width: 250 }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          allowClear
-        />
-        {isAdmin && (
-          <Select
-            placeholder="按渠道筛选"
-            style={{ width: 180 }}
-            allowClear
-            value={channelFilter}
-            onChange={setChannelFilter}
-          >
-            {mockChannels.map((c) => (
-              <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
-            ))}
-          </Select>
-        )}
-        <RangePicker placeholder={['开始日期', '结束日期']} />
+      <div className="search-bar">
+        <Form form={searchForm} layout="inline">
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={8}>
+              <Form.Item label="关键词" name="search" style={{ width: '100%' }}>
+                <Input
+                  placeholder="流水号/订单号"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            {isAdmin && (
+              <Col span={8}>
+                <Form.Item label="渠道" name="channel" style={{ width: '100%' }}>
+                  <Select
+                    placeholder="全部渠道"
+                    allowClear
+                    value={channelFilter}
+                    onChange={setChannelFilter}
+                  >
+                    {mockChannels.map((c) => (
+                      <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
+            <Col span={8}>
+              <Form.Item label="日期" name="dateRange" style={{ width: '100%' }}>
+                <RangePicker
+                  placeholder={['开始日期', '结束日期']}
+                  style={{ width: '100%' }}
+                  onChange={(dates) => setDateRange(dates as [Dayjs, Dayjs] | null)}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="search-buttons">
+            <Button type="primary" icon={<SearchOutlined />}>搜索</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>重置</Button>
+          </div>
+        </Form>
       </div>
-      <Table columns={columns} dataSource={filtered} rowKey="id" />
+
+      <div className="table-toolbar">
+        <Button icon={<ReloadOutlined />}>刷新</Button>
+      </div>
+
+      <Table columns={columns} dataSource={filtered} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
     </>
   );
 }

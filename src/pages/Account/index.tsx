@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import { mockAccounts, mockChannels } from '@/mock/data';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { mockAccounts } from '@/mock/data';
+import { useChannels } from '@/store/useChannels';
 import type { Account } from '@/types';
 
 export default function AccountList() {
+  const { channels } = useChannels();
   const [accounts, setAccounts] = useState<Account[]>(mockAccounts);
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -24,7 +26,7 @@ export default function AccountList() {
 
   const handleAdd = () => {
     form.validateFields().then((values) => {
-      const channel = mockChannels.find((c) => c.id === values.channelId);
+      const channel = channels.find((c) => c.id === values.channelId);
       const newAccount: Account = {
         id: 'a' + Date.now(),
         username: values.username,
@@ -62,7 +64,9 @@ export default function AccountList() {
             title={`确定${record.status === 'active' ? '停用' : '启用'}该账号？`}
             onConfirm={() => toggleStatus(record.id)}
           >
-            <a>{record.status === 'active' ? '停用' : '启用'}</a>
+            <a style={{ color: record.status === 'active' ? '#e74c3c' : '#27ae60' }}>
+              {record.status === 'active' ? '停用' : '启用'}
+            </a>
           </Popconfirm>
           <Popconfirm title="确定重置该账号密码？" onConfirm={() => resetPassword(record)}>
             <a>重置密码</a>
@@ -74,13 +78,13 @@ export default function AccountList() {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2 style={{ margin: 0 }}>账号管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>
-          新增账号
-        </Button>
+      <div className="table-toolbar">
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>
+        <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
-      <Table columns={columns} dataSource={accounts} rowKey="id" />
+
+      <Table columns={columns} dataSource={accounts} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
+
       <Modal
         title="新增渠道商账号"
         open={modalOpen}
@@ -92,7 +96,7 @@ export default function AccountList() {
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="channelId" label="所属渠道商" rules={[{ required: true, message: '请选择' }]}>
             <Select placeholder="请选择渠道商">
-              {mockChannels.filter((c) => c.status === 'active').map((c) => (
+              {channels.filter((c) => c.status === 'active').map((c) => (
                 <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
               ))}
             </Select>

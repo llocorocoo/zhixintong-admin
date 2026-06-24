@@ -1,10 +1,12 @@
 import { Card, Col, Row, Statistic } from 'antd';
 import { TeamOutlined, ShoppingCartOutlined, TransactionOutlined, DollarOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
-import { mockChannels, mockOrders, mockTransactions } from '@/mock/data';
+import { useChannels } from '@/store/useChannels';
+import { mockOrders, mockTransactions } from '@/mock/data';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { channels } = useChannels();
   const isAdmin = user?.role === 'admin';
 
   const orders = isAdmin ? mockOrders : mockOrders.filter((o) => o.channelId === user?.channelId);
@@ -13,14 +15,11 @@ export default function Dashboard() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 24 }}>
-        {isAdmin ? '平台概览' : '我的数据'}
-      </h2>
       <Row gutter={[16, 16]}>
         {isAdmin && (
           <Col xs={24} sm={12} lg={6}>
             <Card>
-              <Statistic title="渠道商总数" value={mockChannels.length} prefix={<TeamOutlined />} />
+              <Statistic title="渠道商总数" value={channels.length} prefix={<TeamOutlined />} />
             </Card>
           </Col>
         )}

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Table, Tag, Input, Select, Modal, Descriptions, DatePicker } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Tag, Input, Select, Modal, Descriptions, DatePicker, Form, Button, Row, Col } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockOrders, mockChannels } from '@/mock/data';
 import { ORDER_STATUS_MAP, REPORT_TYPE_MAP } from '@/utils/constants';
 import type { Order } from '@/types';
+import type { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -15,13 +16,26 @@ export default function OrderList() {
 
   const [search, setSearch] = useState('');
   const [channelFilter, setChannelFilter] = useState<string | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
+  const [searchForm] = Form.useForm();
 
   const filtered = allOrders.filter((o) => {
     if (search && !o.orderNo.includes(search) && !o.userName.includes(search)) return false;
     if (channelFilter && o.channelId !== channelFilter) return false;
+    if (dateRange) {
+      const orderDate = o.createdAt.split(' ')[0];
+      if (orderDate < dateRange[0].format('YYYY-MM-DD') || orderDate > dateRange[1].format('YYYY-MM-DD')) return false;
+    }
     return true;
   });
+
+  const handleReset = () => {
+    searchForm.resetFields();
+    setSearch('');
+    setChannelFilter(undefined);
+    setDateRange(null);
+  };
 
   const columns = [
     { title: '订单编号', dataIndex: 'orderNo', key: 'orderNo' },
@@ -54,31 +68,57 @@ export default function OrderList() {
 
   return (
     <>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <Input
-          placeholder="搜索订单号/用户姓名"
-          prefix={<SearchOutlined />}
-          style={{ width: 250 }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          allowClear
-        />
-        {isAdmin && (
-          <Select
-            placeholder="按渠道筛选"
-            style={{ width: 180 }}
-            allowClear
-            value={channelFilter}
-            onChange={setChannelFilter}
-          >
-            {mockChannels.map((c) => (
-              <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
-            ))}
-          </Select>
-        )}
-        <RangePicker placeholder={['开始日期', '结束日期']} />
+      <div className="search-bar">
+        <Form form={searchForm} layout="inline">
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={8}>
+              <Form.Item label="关键词" name="search" style={{ width: '100%' }}>
+                <Input
+                  placeholder="订单号/用户姓名"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            {isAdmin && (
+              <Col span={8}>
+                <Form.Item label="渠道" name="channel" style={{ width: '100%' }}>
+                  <Select
+                    placeholder="全部渠道"
+                    allowClear
+                    value={channelFilter}
+                    onChange={setChannelFilter}
+                  >
+                    {mockChannels.map((c) => (
+                      <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
+            <Col span={8}>
+              <Form.Item label="日期" name="dateRange" style={{ width: '100%' }}>
+                <RangePicker
+                  placeholder={['开始日期', '结束日期']}
+                  style={{ width: '100%' }}
+                  onChange={(dates) => setDateRange(dates as [Dayjs, Dayjs] | null)}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="search-buttons">
+            <Button type="primary" icon={<SearchOutlined />}>搜索</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>重置</Button>
+          </div>
+        </Form>
       </div>
-      <Table columns={columns} dataSource={filtered} rowKey="id" />
+
+      <div className="table-toolbar">
+        <Button icon={<ReloadOutlined />}>刷新</Button>
+      </div>
+
+      <Table columns={columns} dataSource={filtered} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
 
       <Modal
         title="订单详情"

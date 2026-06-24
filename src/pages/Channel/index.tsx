@@ -1,29 +1,31 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Input, Modal, Form, Select, message, Popconfirm } from 'antd';
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Input, Modal, Form, Select, message, Popconfirm, Row, Col } from 'antd';
+import { PlusOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { mockChannels } from '@/mock/data';
+import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
 import type { Channel, ChannelType } from '@/types';
 
 export default function ChannelList() {
   const navigate = useNavigate();
-  const [channels, setChannels] = useState<Channel[]>(mockChannels);
+  const { channels, addChannel, updateChannel, toggleStatus } = useChannels();
   const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingChannel, setEditingChannel] = useState<Channel | null>(null);
   const [form] = Form.useForm();
+  const [searchForm] = Form.useForm();
 
-  const filtered = channels.filter(
-    (c) => c.name.includes(search) || c.contact.includes(search)
-  );
+  const filtered = channels.filter((c) => {
+    if (search && !c.name.includes(search) && !c.contact.includes(search)) return false;
+    if (typeFilter && c.type !== typeFilter) return false;
+    if (statusFilter && c.status !== statusFilter) return false;
+    return true;
+  });
 
-  const toggleStatus = (id: string) => {
-    setChannels((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, status: c.status === 'active' ? 'inactive' : 'active' } : c
-      )
-    );
+  const handleToggle = (id: string) => {
+    toggleStatus(id);
     message.success('状态已更新');
   };
 
@@ -42,25 +44,30 @@ export default function ChannelList() {
   const handleSave = () => {
     form.validateFields().then((values) => {
       if (editingChannel) {
-        setChannels((prev) =>
-          prev.map((c) => (c.id === editingChannel.id ? { ...c, ...values } : c))
-        );
+        updateChannel(editingChannel.id, values);
         message.success('编辑成功');
       } else {
+        const promoCode = values.name.substring(0, 2).toUpperCase() + Date.now().toString().slice(-4);
         const newChannel: Channel = {
           ...values,
           id: 'ch' + Date.now(),
           status: 'active' as const,
-          promoCode: values.name.substring(0, 2).toUpperCase() + Date.now().toString().slice(-4),
-          promoLink: '',
+          promoCode,
+          promoLink: `https://zhixintong.com/r/${promoCode}`,
           createdAt: new Date().toISOString().split('T')[0],
         };
-        newChannel.promoLink = `https://zhixintong.com/r/${newChannel.promoCode}`;
-        setChannels((prev) => [...prev, newChannel]);
+        addChannel(newChannel);
         message.success('新增成功');
       }
       setModalOpen(false);
     });
+  };
+
+  const handleReset = () => {
+    searchForm.resetFields();
+    setSearch('');
+    setTypeFilter(undefined);
+    setStatusFilter(undefined);
   };
 
   const columns = [
@@ -86,13 +93,20 @@ export default function ChannelList() {
       title: '操作', key: 'action',
       render: (_: unknown, record: Channel) => (
         <Space>
-          <a onClick={() => navigate(`/channel/${record.id}`)}>详情</a>
           <a onClick={() => openEdit(record)}>编辑</a>
+          {record.type === 'pure' && (
+            <a onClick={() => navigate(`/channel/${record.id}`)}>推广链接</a>
+          )}
+          {record.type === 'oem' && (
+            <a onClick={() => navigate(`/channel/${record.id}`)}>域名/Logo</a>
+          )}
           <Popconfirm
             title={`确定${record.status === 'active' ? '停用' : '启用'}该渠道商？`}
-            onConfirm={() => toggleStatus(record.id)}
+            onConfirm={() => handleToggle(record.id)}
           >
-            <a>{record.status === 'active' ? '停用' : '启用'}</a>
+            <a style={{ color: record.status === 'active' ? '#e74c3c' : '#27ae60' }}>
+              {record.status === 'active' ? '停用' : '启用'}
+            </a>
           </Popconfirm>
         </Space>
       ),
@@ -101,20 +115,60 @@ export default function ChannelList() {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Input
-          placeholder="搜索渠道商名称/联系人"
-          prefix={<SearchOutlined />}
-          style={{ width: 300 }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          allowClear
-        />
-        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>
-          新增渠道商
-        </Button>
+      <div className="search-bar">
+        <Form form={searchForm} layout="inline">
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={8}>
+              <Form.Item label="名称" name="name" style={{ width: '100%' }}>
+                <Input
+                  placeholder="渠道商名称/联系人"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="类型" name="type" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部类型"
+                  allowClear
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                >
+                  <Select.Option value="pure">纯渠道</Select.Option>
+                  <Select.Option value="oem">OEM</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="状态" name="status" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部状态"
+                  allowClear
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                >
+                  <Select.Option value="active">启用</Select.Option>
+                  <Select.Option value="inactive">停用</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="search-buttons">
+            <Button type="primary" icon={<SearchOutlined />}>搜索</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>重置</Button>
+          </div>
+        </Form>
       </div>
-      <Table columns={columns} dataSource={filtered} rowKey="id" />
+
+      <div className="table-toolbar">
+        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>
+        <Button icon={<ReloadOutlined />}>刷新</Button>
+      </div>
+
+      <Table columns={columns} dataSource={filtered} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
+
       <Modal
         title={editingChannel ? '编辑渠道商' : '新增渠道商'}
         open={modalOpen}
