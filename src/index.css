@@ -1,11 +1,64 @@
+/* ===== CSS Variables ===== */
+:root {
+  --header-bg: #1a2b4a;
+  --sider-bg: #2c3e50;
+  --sider-logo-bg: #1a2b4a;
+  --sider-hover: #34495e;
+  --sider-selected: #2980b9;
+  --sider-sub-bg: #253646;
+  --breadcrumb-bg: #f0f2f5;
+  --breadcrumb-color: #666;
+  --breadcrumb-border: #e0e0e0;
+  --content-bg: #fff;
+  --search-bg: #fafbfc;
+  --search-border: #e8e8e8;
+  --search-label: #333;
+  --table-border: #e0e0e0;
+  --table-head-bg: #4a6fa5;
+  --table-head-border: #3d5f8f;
+  --table-row-border: #eee;
+  --table-row-even: #fafbfc;
+  --table-row-hover: #e8f0fe;
+  --table-link: #2980b9;
+  --table-link-hover: #1a5276;
+  --text-primary: #333;
+  --text-secondary: #666;
+}
+
+:root[data-theme="dark"] {
+  --header-bg: #111926;
+  --sider-bg: #1a1f2b;
+  --sider-logo-bg: #111926;
+  --sider-hover: #2a3142;
+  --sider-selected: #2980b9;
+  --sider-sub-bg: #151a24;
+  --breadcrumb-bg: #1a1f2b;
+  --breadcrumb-color: #aaa;
+  --breadcrumb-border: #2a3142;
+  --content-bg: #141820;
+  --search-bg: #1a1f2b;
+  --search-border: #2a3142;
+  --search-label: #ccc;
+  --table-border: #2a3142;
+  --table-head-bg: #1e2a3a;
+  --table-head-border: #2a3a4f;
+  --table-row-border: #2a3142;
+  --table-row-even: #1a1f2b;
+  --table-row-hover: #1e2a3a;
+  --table-link: #5ba8d9;
+  --table-link-hover: #8ac4ea;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaa;
+}
+
 /* ===== Global Reset ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
 
-/* ===== Layout Header - 深蓝顶栏 ===== */
+/* ===== Layout Header ===== */
 .app-header {
   height: 50px;
-  background: #1a2b4a !important;
+  background: var(--header-bg) !important;
   padding: 0 20px !important;
   display: flex;
   align-items: center;
@@ -28,12 +81,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   font-size: 14px;
 }
 
-/* ===== Sidebar - 深色侧边栏 ===== */
+/* ===== Sidebar ===== */
 .app-sider {
-  background: #2c3e50 !important;
+  background: var(--sider-bg) !important;
 }
 .app-sider .ant-layout-sider-children {
-  background: #2c3e50;
+  background: var(--sider-bg);
 }
 .app-sider .sider-logo {
   height: 50px;
@@ -45,10 +98,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
-  background: #1a2b4a;
+  background: var(--sider-logo-bg);
 }
 .app-sider .ant-menu {
-  background: #2c3e50 !important;
+  background: var(--sider-bg) !important;
   border-right: none;
 }
 .app-sider .ant-menu .ant-menu-item {
@@ -58,14 +111,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 }
 .app-sider .ant-menu .ant-menu-item:hover {
   color: #fff;
-  background: #34495e !important;
+  background: var(--sider-hover) !important;
 }
 .app-sider .ant-menu .ant-menu-item-selected {
   color: #fff !important;
-  background: #2980b9 !important;
+  background: var(--sider-selected) !important;
   border-radius: 0;
 }
-/* SubMenu 父级标题（如"用户中心"） */
 .app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title {
   color: #ffffffcc !important;
   margin: 2px 0;
@@ -73,40 +125,39 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 }
 .app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title:hover {
   color: #fff !important;
-  background: #34495e !important;
+  background: var(--sider-hover) !important;
 }
 .app-sider .ant-menu .ant-menu-submenu > .ant-menu-submenu-title .ant-menu-submenu-arrow {
   color: #ffffffcc;
 }
-/* SubMenu 展开后的子菜单 */
 .app-sider .ant-menu .ant-menu-sub {
-  background: #253646 !important;
+  background: var(--sider-sub-bg) !important;
 }
 .app-sider .ant-menu .ant-menu-sub .ant-menu-item {
   padding-left: 48px !important;
 }
 
-/* ===== Breadcrumb 面包屑栏 ===== */
+/* ===== Breadcrumb ===== */
 .app-breadcrumb {
   padding: 10px 20px;
-  background: #f0f2f5;
+  background: var(--breadcrumb-bg);
   font-size: 13px;
-  color: #666;
-  border-bottom: 1px solid #e0e0e0;
+  color: var(--breadcrumb-color);
+  border-bottom: 1px solid var(--breadcrumb-border);
 }
 
-/* ===== Content 内容区 ===== */
+/* ===== Content ===== */
 .app-content {
   margin: 0;
   padding: 16px 20px;
-  background: #fff;
+  background: var(--content-bg);
   min-height: 280px;
 }
 
-/* ===== Search Bar 搜索栏 ===== */
+/* ===== Search Bar ===== */
 .search-bar {
-  background: #fafbfc;
-  border: 1px solid #e8e8e8;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
   border-radius: 2px;
   padding: 20px 24px 12px;
   margin-bottom: 16px;
@@ -115,7 +166,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   margin-bottom: 12px;
 }
 .search-bar .ant-form-item-label > label {
-  color: #333;
+  color: var(--search-label);
   font-size: 14px;
 }
 .search-bar .search-buttons {
@@ -128,7 +179,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   margin: 0 8px;
 }
 
-/* ===== Table Toolbar 表格工具栏 ===== */
+/* ===== Table Toolbar ===== */
 .table-toolbar {
   display: flex;
   justify-content: flex-end;
@@ -136,18 +187,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   margin-bottom: 12px;
 }
 
-/* ===== Table 表格样式 ===== */
+/* ===== Table ===== */
 .ant-table {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--table-border);
 }
 .ant-table-thead > tr > th,
 .ant-table-thead > tr > td {
-  background: #4a6fa5 !important;
+  background: var(--table-head-bg) !important;
   color: #fff !important;
   font-weight: 500;
   font-size: 14px;
   padding: 10px 12px;
-  border-bottom: 1px solid #3d5f8f !important;
+  border-bottom: 1px solid var(--table-head-border) !important;
   text-align: center !important;
 }
 .ant-table-thead > tr > th::before {
@@ -157,28 +208,28 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   padding: 10px 12px;
   font-size: 13px;
   text-align: center !important;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--table-row-border);
 }
 .ant-table-tbody > tr:hover > td {
-  background: #e8f0fe !important;
+  background: var(--table-row-hover) !important;
 }
 .ant-table-tbody > tr:nth-child(even) > td {
-  background: #fafbfc;
+  background: var(--table-row-even);
 }
 .ant-table-tbody > tr:nth-child(even):hover > td {
-  background: #e8f0fe !important;
+  background: var(--table-row-hover) !important;
 }
 
 /* Table action links */
 .ant-table-tbody a {
-  color: #2980b9;
+  color: var(--table-link);
   margin: 0 4px;
 }
 .ant-table-tbody a:hover {
-  color: #1a5276;
+  color: var(--table-link-hover);
 }
 
-/* ===== Pagination 分页 ===== */
+/* ===== Pagination ===== */
 .ant-pagination {
   margin-top: 16px !important;
   justify-content: flex-start !important;
@@ -190,4 +241,3 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .ant-pagination .ant-pagination-item-active a {
   color: #fff;
 }
-

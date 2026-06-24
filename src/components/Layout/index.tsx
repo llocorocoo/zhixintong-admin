@@ -14,9 +14,12 @@ import {
   LinkOutlined,
   HomeOutlined,
   IdcardOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
+import { useTheme } from '@/store/useTheme';
 
 const { Header, Sider, Content } = Layout;
 
@@ -100,6 +103,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { mode, toggle } = useTheme();
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : channelMenuItems;
   const breadcrumbs = getBreadcrumb(location.pathname);
@@ -144,12 +148,21 @@ export default function AppLayout() {
               onClick={() => setCollapsed(!collapsed)}
             />
           </div>
-          <Dropdown menu={{ items: dropdownItems, onClick: onDropdownClick }} placement="bottomRight">
-            <div className="header-user">
-              <Avatar size="small" icon={<UserOutlined />} style={{ background: '#2980b9' }} />
-              <span>欢迎您，{user?.name}</span>
-            </div>
-          </Dropdown>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Button
+              type="text"
+              icon={mode === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+              onClick={toggle}
+              style={{ color: '#ffffffcc', fontSize: 16 }}
+              title={mode === 'dark' ? '切换到白天模式' : '切换到黑夜模式'}
+            />
+            <Dropdown menu={{ items: dropdownItems, onClick: onDropdownClick }} placement="bottomRight">
+              <div className="header-user">
+                <Avatar size="small" icon={<UserOutlined />} style={{ background: '#2980b9' }} />
+                <span>欢迎您，{user?.name}</span>
+              </div>
+            </Dropdown>
+          </div>
         </Header>
 
         <div className="app-breadcrumb">
