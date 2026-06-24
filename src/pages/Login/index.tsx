@@ -25,10 +25,10 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1a2b4a 0%, #2c3e50 100%)',
     }}>
       <Card style={{ width: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: 32, color: '#1677ff' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 32, color: '#2c3e50' }}>
           职信通后台管理系统
         </h2>
         <Form name="login" onFinish={onFinish} size="large">
