@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Tag, Modal, Form, Input, message, QRCode } from 'antd';
+import { Avatar, Tag, Modal, Form, Input, message } from 'antd';
 import { UserOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { useChannels } from '@/store/useChannels';
