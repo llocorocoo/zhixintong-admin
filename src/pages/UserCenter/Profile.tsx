@@ -42,23 +42,23 @@ export default function Profile() {
   const registerId = `2026${user?.id?.padStart(16, '0') || '0000000000000000'}`;
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e8e8e8' }}>
+    <div style={{ background: 'var(--content-bg)', border: '1px solid var(--search-border)' }}>
       {/* 顶部：头像 + 认证信息 + 注册ID */}
       <div style={{
         display: 'flex', alignItems: 'center', padding: '32px 40px',
-        borderBottom: '1px dashed #d9d9d9',
+        borderBottom: '1px dashed var(--search-border)',
       }}>
         <Avatar size={80} icon={<UserOutlined />} style={{ background: '#c0c0c0', flexShrink: 0 }} />
         <div style={{ marginLeft: 24 }}>
           <div style={{ marginBottom: 10 }}>
-            <span style={{ color: '#666', marginRight: 12 }}>角色认证：</span>
+            <span style={{ color: 'var(--text-secondary)', marginRight: 12 }}>角色认证：</span>
             <Tag color={user?.role === 'admin' ? 'blue' : 'green'} style={{ fontSize: 14 }}>
               {user?.role === 'admin' ? '平台管理员' : '渠道商'}
             </Tag>
             {channel && (
               <>
-                <span style={{ color: '#666', marginLeft: 20, marginRight: 12 }}>所属渠道：</span>
-                <span style={{ color: '#2980b9' }}>{channel.name}</span>
+                <span style={{ color: 'var(--text-secondary)', marginLeft: 20, marginRight: 12 }}>所属渠道：</span>
+                <span style={{ color: 'var(--table-link)' }}>{channel.name}</span>
                 <Tag color={channel.type === 'oem' ? 'purple' : 'blue'} style={{ marginLeft: 8 }}>
                   {channel.type === 'oem' ? 'OEM' : '纯渠道'}
                 </Tag>
@@ -66,8 +66,8 @@ export default function Profile() {
             )}
           </div>
           <div>
-            <span style={{ color: '#666', marginRight: 12 }}>注册ID：</span>
-            <span style={{ color: '#333', fontSize: 15 }}>{registerId}</span>
+            <span style={{ color: 'var(--text-secondary)', marginRight: 12 }}>注册ID：</span>
+            <span style={{ color: 'var(--text-primary)', fontSize: 15 }}>{registerId}</span>
           </div>
         </div>
       </div>
@@ -173,10 +173,10 @@ function ProfileRow({ label, content, status, action, isLast }: {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', padding: '20px 40px',
-      borderBottom: isLast ? 'none' : '1px dashed #d9d9d9',
+      borderBottom: isLast ? 'none' : '1px dashed var(--search-border)',
     }}>
-      <div style={{ width: 80, color: '#666', flexShrink: 0, fontSize: 14 }}>{label}</div>
-      <div style={{ flex: 1, color: '#333', fontSize: 13, lineHeight: 1.6 }}>{content}</div>
+      <div style={{ width: 80, color: 'var(--text-secondary)', flexShrink: 0, fontSize: 14 }}>{label}</div>
+      <div style={{ flex: 1, color: 'var(--text-primary)', fontSize: 13, lineHeight: 1.6 }}>{content}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, marginLeft: 20 }}>
         {status}
         {action}

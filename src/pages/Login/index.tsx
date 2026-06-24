@@ -2,11 +2,14 @@ import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/store/useAuth';
+import { useTheme } from '@/store/useTheme';
 import { mockUsers } from '@/mock/data';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { mode } = useTheme();
+  const isDark = mode === 'dark';
 
   const onFinish = (values: { username: string; password: string }) => {
     const user = mockUsers.find(
@@ -25,10 +28,12 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1a2b4a 0%, #2c3e50 100%)',
+      background: isDark
+        ? 'linear-gradient(135deg, #0a1628 0%, #1b2838 100%)'
+        : 'linear-gradient(135deg, #1a2b4a 0%, #2c3e50 100%)',
     }}>
-      <Card style={{ width: 400, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: 32, color: '#2c3e50' }}>
+      <Card style={{ width: 400, boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,0,0,0.1)' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 32, color: isDark ? '#dce4ec' : '#2c3e50' }}>
           职信通后台管理系统
         </h2>
         <Form name="login" onFinish={onFinish} size="large">

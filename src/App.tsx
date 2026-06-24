@@ -13,9 +13,18 @@ export default function App() {
       theme={{
         algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#2980b9',
+          colorPrimary: mode === 'dark' ? '#3498db' : '#2980b9',
           borderRadius: 2,
           fontSize: 14,
+          ...(mode === 'dark' ? {
+            colorBgContainer: '#1b2838',
+            colorBgElevated: '#1e2d3d',
+            colorBgLayout: '#0f1923',
+            colorBorder: '#2a3f55',
+            colorBorderSecondary: '#233040',
+            colorText: '#dce4ec',
+            colorTextSecondary: '#8899aa',
+          } : {}),
         },
       }}
     >
