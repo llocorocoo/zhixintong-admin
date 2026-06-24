@@ -44,7 +44,7 @@ export default function Login() {
             </Button>
           </Form.Item>
           <div style={{ textAlign: 'center', color: '#999', fontSize: 12 }}>
-            管理员: admin / admin123 &nbsp;|&nbsp; 渠道商: channel01 / 123456
+            管理员: admin / admin123 &nbsp;|&nbsp; 纯渠道: channel01 / 123456 &nbsp;|&nbsp; OEM: channel02 / 123456
           </div>
         </Form>
       </Card>
