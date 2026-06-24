@@ -161,6 +161,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 /* ===== Pagination 分页 ===== */
 .ant-pagination {
   margin-top: 16px !important;
+  justify-content: flex-start !important;
 }
 .ant-pagination .ant-pagination-item-active {
   background: #2980b9;
