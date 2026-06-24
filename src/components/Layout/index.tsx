@@ -63,7 +63,12 @@ const adminMenuItems: MenuProps['items'] = [
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
   { key: '/settings', icon: <SettingOutlined />, label: '系统配置' },
-  { key: '/user-center', icon: <IdcardOutlined />, label: '用户中心' },
+  {
+    key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
+    children: [
+      { key: '/user-center/profile', label: '基本信息' },
+    ],
+  },
 ];
 
 const channelMenuItems: MenuProps['items'] = [
@@ -71,17 +76,28 @@ const channelMenuItems: MenuProps['items'] = [
   { key: '/channel/my', icon: <LinkOutlined />, label: '我的推广' },
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
-  { key: '/user-center', icon: <IdcardOutlined />, label: '用户中心' },
+  {
+    key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
+    children: [
+      { key: '/user-center/profile', label: '基本信息' },
+    ],
+  },
 ];
 
 function getSelectedKey(pathname: string): string {
   if (pathname === '/') return '/';
-  if (pathname.startsWith('/user-center')) return '/user-center';
+  if (pathname.startsWith('/user-center/')) return pathname;
+  if (pathname === '/user-center') return '/user-center/profile';
   if (pathname.startsWith('/channel/my')) return '/channel/my';
   if (pathname.startsWith('/channel')) return '/channel';
   if (pathname.startsWith('/order')) return '/order';
   if (pathname.startsWith('/transaction')) return '/transaction';
   return '/' + pathname.split('/')[1];
+}
+
+function getOpenKeys(pathname: string): string[] {
+  if (pathname.startsWith('/user-center')) return ['/user-center'];
+  return [];
 }
 
 export default function AppLayout() {
@@ -120,6 +136,7 @@ export default function AppLayout() {
         <Menu
           mode="inline"
           selectedKeys={[getSelectedKey(location.pathname)]}
+          defaultOpenKeys={getOpenKeys(location.pathname)}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
         />
