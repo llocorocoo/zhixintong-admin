@@ -4,6 +4,7 @@ export const mockUsers: (User & { password: string })[] = [
   { id: '1', username: 'admin', password: 'admin123', name: '系统管理员', role: 'admin', isSuperAdmin: true },
   { id: '2', username: 'channel01', password: '123456', name: '张三', role: 'channel', channelId: 'ch1' },
   { id: '3', username: 'channel02', password: '123456', name: '李四', role: 'channel', channelId: 'ch2' },
+  { id: '4', username: 'admin02', password: 'admin123', name: '运营专员', role: 'admin', isSuperAdmin: false, permissions: ['channel:view', 'channel:pure_detail', 'order:view', 'transaction:view'] },
 ];
 
 export const mockChannels: Channel[] = [
