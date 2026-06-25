@@ -4,8 +4,8 @@ import type { Permission } from '@/types';
 export function usePermission() {
   const { user } = useAuth();
 
-  // 兼容旧缓存：admin角色且没有明确设置isSuperAdmin为false的，视为超级管理员
-  const isSuperAdmin = user?.role === 'admin' && user.isSuperAdmin !== false && (user.isSuperAdmin === true || !user.permissions);
+  // 超级管理员判断：isSuperAdmin为true，或admin角色且无permissions字段（兼容旧缓存）
+  const isSuperAdmin = user?.role === 'admin' && (user.isSuperAdmin === true || (!('isSuperAdmin' in user) && !user.permissions));
 
   const hasPermission = (permission: Permission): boolean => {
     if (!user || user.role !== 'admin') return false;
