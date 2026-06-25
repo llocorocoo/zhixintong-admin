@@ -35,12 +35,12 @@ export const mockChannels: Channel[] = [
 export const mockOrders: Order[] = [
   { id: 'o1', orderNo: 'ORD20240601001', userName: '用户A', userPhone: '139****1001', reportType: 'basic', amount: 29.9, status: 'completed', channelId: 'ch1', channelName: '信达渠道', createdAt: '2024-06-01 10:30:00' },
   { id: 'o2', orderNo: 'ORD20240601002', userName: '用户B', userPhone: '139****1002', reportType: 'standard', amount: 59.9, status: 'completed', channelId: 'ch1', channelName: '信达渠道', createdAt: '2024-06-01 11:20:00' },
-  { id: 'o3', orderNo: 'ORD20240602001', userName: '用户C', userPhone: '139****1003', reportType: 'premium', amount: 99.9, status: 'paid', channelId: 'ch2', channelName: '华信科技', createdAt: '2024-06-02 09:15:00' },
+  { id: 'o3', orderNo: 'ORD20240602001', userName: '用户C', userPhone: '139****1003', reportType: 'premium', amount: 99.9, status: 'pending', channelId: 'ch2', channelName: '华信科技', createdAt: '2024-06-02 09:15:00' },
   { id: 'o4', orderNo: 'ORD20240602002', userName: '用户D', userPhone: '139****1004', reportType: 'basic', amount: 29.9, status: 'pending', channelId: 'ch2', channelName: '华信科技', createdAt: '2024-06-02 14:00:00' },
   { id: 'o5', orderNo: 'ORD20240603001', userName: '用户E', userPhone: '139****1005', reportType: 'standard', amount: 59.9, status: 'cancelled', channelId: 'ch3', channelName: '诚信数据', createdAt: '2024-06-03 16:45:00' },
   { id: 'o6', orderNo: 'ORD20240604001', userName: '用户F', userPhone: '139****1006', reportType: 'premium', amount: 99.9, status: 'completed', channelId: 'ch4', channelName: '鼎信服务', createdAt: '2024-06-04 08:30:00' },
   { id: 'o7', orderNo: 'ORD20240605001', userName: '用户G', userPhone: '139****1007', reportType: 'basic', amount: 29.9, status: 'completed', channelId: 'ch1', channelName: '信达渠道', createdAt: '2024-06-05 12:00:00' },
-  { id: 'o8', orderNo: 'ORD20240606001', userName: '用户H', userPhone: '139****1008', reportType: 'standard', amount: 59.9, status: 'paid', channelId: 'ch4', channelName: '鼎信服务', createdAt: '2024-06-06 10:10:00' },
+  { id: 'o8', orderNo: 'ORD20240606001', userName: '用户H', userPhone: '139****1008', reportType: 'standard', amount: 59.9, status: 'pending', channelId: 'ch4', channelName: '鼎信服务', createdAt: '2024-06-06 10:10:00' },
 ];
 
 export const mockTransactions: Transaction[] = [

@@ -87,7 +87,7 @@ export interface Channel {
   createdAt: string;
 }
 
-export type OrderStatus = 'pending' | 'paid' | 'completed' | 'cancelled';
+export type OrderStatus = 'pending' | 'completed' | 'cancelled';
 export type ReportType = 'basic' | 'standard' | 'premium';
 
 export interface Order {

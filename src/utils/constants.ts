@@ -5,8 +5,7 @@ export const REPORT_TYPE_MAP: Record<string, string> = {
 };
 
 export const ORDER_STATUS_MAP: Record<string, { text: string; color: string }> = {
-  pending: { text: '待支付', color: 'orange' },
-  paid: { text: '已支付', color: 'blue' },
+  pending: { text: '未完成', color: 'orange' },
   completed: { text: '已完成', color: 'green' },
   cancelled: { text: '已取消', color: 'default' },
 };
