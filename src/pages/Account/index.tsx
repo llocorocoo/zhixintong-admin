@@ -3,10 +3,13 @@ import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconf
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
 import { useChannels } from '@/store/useChannels';
+import { usePermission } from '@/hooks/usePermission';
 import type { Account } from '@/types';
 
 export default function AccountList() {
   const { channels } = useChannels();
+  const { hasPermission } = usePermission();
+  const canEdit = hasPermission('channel_account:edit');
   const [accounts, setAccounts] = useState<Account[]>(mockAccounts);
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -60,17 +63,21 @@ export default function AccountList() {
       title: '操作', key: 'action',
       render: (_: unknown, record: Account) => (
         <Space>
-          <Popconfirm
-            title={`确定${record.status === 'active' ? '停用' : '启用'}该账号？`}
-            onConfirm={() => toggleStatus(record.id)}
-          >
-            <a style={{ color: record.status === 'active' ? '#e74c3c' : '#27ae60' }}>
-              {record.status === 'active' ? '停用' : '启用'}
-            </a>
-          </Popconfirm>
-          <Popconfirm title="确定重置该账号密码？" onConfirm={() => resetPassword(record)}>
-            <a>重置密码</a>
-          </Popconfirm>
+          {canEdit && (
+            <>
+              <Popconfirm
+                title={`确定${record.status === 'active' ? '停用' : '启用'}该账号？`}
+                onConfirm={() => toggleStatus(record.id)}
+              >
+                <a style={{ color: record.status === 'active' ? '#e74c3c' : '#27ae60' }}>
+                  {record.status === 'active' ? '停用' : '启用'}
+                </a>
+              </Popconfirm>
+              <Popconfirm title="确定重置该账号密码？" onConfirm={() => resetPassword(record)}>
+                <a>重置密码</a>
+              </Popconfirm>
+            </>
+          )}
         </Space>
       ),
     },
@@ -79,7 +86,7 @@ export default function AccountList() {
   return (
     <>
       <div className="table-toolbar">
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>
+        {canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>}
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 

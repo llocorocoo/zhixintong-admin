@@ -4,11 +4,14 @@ import { PlusOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom';
 import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
+import { usePermission } from '@/hooks/usePermission';
 import type { Channel, ChannelType } from '@/types';
 
 export default function ChannelList() {
   const navigate = useNavigate();
   const { channels, addChannel, updateChannel, toggleStatus } = useChannels();
+  const { hasPermission } = usePermission();
+  const canEdit = hasPermission('channel:edit');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
@@ -93,8 +96,9 @@ export default function ChannelList() {
       title: '操作', key: 'action',
       render: (_: unknown, record: Channel) => (
         <Space>
-          <a onClick={() => openEdit(record)}>编辑</a>
+          {canEdit && <a onClick={() => openEdit(record)}>编辑</a>}
           <a onClick={() => navigate(`/channel/${record.id}`)}>渠道详情</a>
+          {canEdit && (
           <Popconfirm
             title={`确定${record.status === 'active' ? '停用' : '启用'}该渠道商？`}
             onConfirm={() => handleToggle(record.id)}
@@ -103,6 +107,7 @@ export default function ChannelList() {
               {record.status === 'active' ? '停用' : '启用'}
             </a>
           </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -158,7 +163,7 @@ export default function ChannelList() {
       </div>
 
       <div className="table-toolbar">
-        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>
+        {canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>}
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 

@@ -20,6 +20,7 @@ import {
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 import { useTheme } from '@/store/useTheme';
+import { usePermission } from '@/hooks/usePermission';
 
 const { Header, Sider, Content } = Layout;
 
@@ -55,21 +56,40 @@ function getBreadcrumb(pathname: string): string[] {
   return [''];
 }
 
-const adminMenuItems: MenuProps['items'] = [
-  { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
-  { key: '/channel', icon: <TeamOutlined />, label: '渠道商管理' },
-  { key: '/account', icon: <UserOutlined />, label: '渠道账号管理' },
-  { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
-  { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
-  { key: '/settings', icon: <SettingOutlined />, label: '系统配置' },
-  {
+function buildAdminMenuItems(hasPermission: (p: string) => boolean, isSuperAdmin: boolean): MenuProps['items'] {
+  const items: MenuProps['items'] = [
+    { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
+  ];
+
+  if (hasPermission('channel:view')) {
+    items.push({ key: '/channel', icon: <TeamOutlined />, label: '渠道商管理' });
+  }
+  if (hasPermission('channel_account:view')) {
+    items.push({ key: '/account', icon: <UserOutlined />, label: '渠道账号管理' });
+  }
+  if (hasPermission('order:view')) {
+    items.push({ key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' });
+  }
+  if (hasPermission('transaction:view')) {
+    items.push({ key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' });
+  }
+  if (hasPermission('settings:view')) {
+    items.push({ key: '/settings', icon: <SettingOutlined />, label: '系统配置' });
+  }
+
+  const userCenterChildren: MenuProps['items'] = [
+    { key: '/user-center/profile', label: '基本信息' },
+  ];
+  if (isSuperAdmin) {
+    userCenterChildren.push({ key: '/user-center/admin-account', label: '管理员账号' });
+  }
+  items.push({
     key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
-    children: [
-      { key: '/user-center/profile', label: '基本信息' },
-      { key: '/user-center/admin-account', label: '管理员账号' },
-    ],
-  },
-];
+    children: userCenterChildren,
+  });
+
+  return items;
+}
 
 const channelMenuItems: MenuProps['items'] = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
@@ -106,8 +126,9 @@ export default function AppLayout() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { mode, toggle } = useTheme();
+  const { hasPermission, isSuperAdmin } = usePermission();
 
-  const menuItems = user?.role === 'admin' ? adminMenuItems : channelMenuItems;
+  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(hasPermission, isSuperAdmin) : channelMenuItems;
   const breadcrumbs = getBreadcrumb(location.pathname);
 
   const dropdownItems: MenuProps['items'] = [

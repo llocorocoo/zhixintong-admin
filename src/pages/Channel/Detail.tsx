@@ -3,11 +3,13 @@ import { Descriptions, Tag, Button, Card, QRCode, Input, Form, Upload, message, 
 import { ArrowLeftOutlined, UploadOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
+import { usePermission } from '@/hooks/usePermission';
 
 export default function ChannelDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { channels, updateChannel } = useChannels();
+  const { hasPermission } = usePermission();
   const channel = channels.find((c) => c.id === id);
 
   if (!channel) {
@@ -60,7 +62,7 @@ export default function ChannelDetail() {
         </Descriptions>
       </Card>
 
-      {channel.type === 'pure' && (
+      {channel.type === 'pure' && hasPermission('channel:pure_detail') && (
         <Card
           title="推广链接"
           style={{ marginBottom: 16 }}
@@ -100,7 +102,7 @@ export default function ChannelDetail() {
         </Card>
       )}
 
-      {channel.type === 'oem' && (
+      {channel.type === 'oem' && hasPermission('channel:oem_detail') && (
         <>
           <Alert
             message="OEM 白标模式：渠道商使用自有域名，系统通过域名映射识别订单来源，同时支持 Logo 定制"
