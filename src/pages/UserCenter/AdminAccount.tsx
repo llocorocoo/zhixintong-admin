@@ -176,7 +176,7 @@ export default function AdminAccountList() {
           </div>
           {PERMISSION_GROUPS.map((group) => (
             <div key={group.group} style={{ marginBottom: 16 }}>
-              <Divider orientation="left" style={{ margin: '8px 0' }}>{group.group}</Divider>
+              <Divider orientation={"left" as const} style={{ margin: '8px 0' }}>{group.group}</Divider>
               {group.items.map((item) => (
                 <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Checkbox

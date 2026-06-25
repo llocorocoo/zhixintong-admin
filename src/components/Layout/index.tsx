@@ -21,6 +21,7 @@ import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 import { useTheme } from '@/store/useTheme';
 import { usePermission } from '@/hooks/usePermission';
+import type { Permission } from '@/types';
 
 const { Header, Sider, Content } = Layout;
 
@@ -56,7 +57,7 @@ function getBreadcrumb(pathname: string): string[] {
   return [''];
 }
 
-function buildAdminMenuItems(hasPermission: (p: string) => boolean, isSuperAdmin: boolean): MenuProps['items'] {
+function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperAdmin: boolean): MenuProps['items'] {
   const items: MenuProps['items'] = [
     { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
   ];
