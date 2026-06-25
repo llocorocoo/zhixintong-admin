@@ -151,6 +151,9 @@ export default function AdminAccountList() {
           <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入' }]}>
             <Input placeholder="请输入姓名" />
           </Form.Item>
+          <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
+            <Input.Password placeholder="请输入登录密码" />
+          </Form.Item>
         </Form>
       </Modal>
 
