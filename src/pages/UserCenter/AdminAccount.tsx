@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, message, Popconfirm, Checkbox, Divider } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, message, Popconfirm, Checkbox } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS } from '@/types';
 import type { Permission } from '@/types';
@@ -176,7 +176,7 @@ export default function AdminAccountList() {
           </div>
           {PERMISSION_GROUPS.map((group) => (
             <div key={group.group} style={{ marginBottom: 16 }}>
-              <Divider orientation={"left" as const} style={{ margin: '8px 0' }}>{group.group}</Divider>
+              <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
               {group.items.map((item) => (
                 <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Checkbox
