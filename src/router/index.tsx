@@ -12,6 +12,7 @@ import TransactionList from '@/pages/Transaction';
 import Settings from '@/pages/Settings';
 import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
+import AdminAccount from '@/pages/UserCenter/AdminAccount';
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="profile" replace /> },
           { path: 'profile', element: <Profile /> },
+          { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
         ],
       },
     ],

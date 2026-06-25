@@ -32,7 +32,8 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/': { title: '仪表盘' },
   '/channel': { title: '渠道商管理' },
   '/channel/my': { title: '渠道详情' },
-  '/account': { title: '账号管理' },
+  '/account': { title: '渠道账号管理' },
+  '/user-center/admin-account': { title: '管理员账号', parent: '/user-center' },
   '/order': { title: '订单管理' },
   '/transaction': { title: '交易明细' },
   '/settings': { title: '系统配置' },
@@ -57,7 +58,7 @@ function getBreadcrumb(pathname: string): string[] {
 const adminMenuItems: MenuProps['items'] = [
   { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
   { key: '/channel', icon: <TeamOutlined />, label: '渠道商管理' },
-  { key: '/account', icon: <UserOutlined />, label: '账号管理' },
+  { key: '/account', icon: <UserOutlined />, label: '渠道账号管理' },
   { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
   { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
   { key: '/settings', icon: <SettingOutlined />, label: '系统配置' },
@@ -65,6 +66,7 @@ const adminMenuItems: MenuProps['items'] = [
     key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
     children: [
       { key: '/user-center/profile', label: '基本信息' },
+      { key: '/user-center/admin-account', label: '管理员账号' },
     ],
   },
 ];
