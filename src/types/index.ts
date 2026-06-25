@@ -2,22 +2,30 @@ export type Role = 'admin' | 'channel';
 
 export type Permission =
   | 'channel:view'
+  | 'channel:add'
   | 'channel:edit'
+  | 'channel:toggle'
   | 'channel:pure_detail'
   | 'channel:oem_detail'
   | 'channel_account:view'
-  | 'channel_account:edit'
+  | 'channel_account:add'
+  | 'channel_account:toggle'
+  | 'channel_account:reset_pwd'
   | 'order:view'
   | 'transaction:view'
   | 'settings:view';
 
 export const ALL_PERMISSIONS: Permission[] = [
   'channel:view',
+  'channel:add',
   'channel:edit',
+  'channel:toggle',
   'channel:pure_detail',
   'channel:oem_detail',
   'channel_account:view',
-  'channel_account:edit',
+  'channel_account:add',
+  'channel_account:toggle',
+  'channel_account:reset_pwd',
   'order:view',
   'transaction:view',
   'settings:view',
@@ -28,7 +36,9 @@ export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label
     group: '渠道商管理',
     items: [
       { key: 'channel:view', label: '查看渠道商', desc: '查看渠道商列表和基本信息' },
-      { key: 'channel:edit', label: '管理渠道商', desc: '新增、编辑、启用/停用' },
+      { key: 'channel:add', label: '新增渠道商', desc: '新增渠道商' },
+      { key: 'channel:edit', label: '编辑渠道商', desc: '编辑渠道商基本信息' },
+      { key: 'channel:toggle', label: '启用/停用渠道商', desc: '切换渠道商状态' },
       { key: 'channel:pure_detail', label: '纯渠道详情操作', desc: '管理推广链接/二维码' },
       { key: 'channel:oem_detail', label: 'OEM渠道详情操作', desc: '管理域名绑定/Logo' },
     ],
@@ -37,7 +47,9 @@ export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label
     group: '渠道账号',
     items: [
       { key: 'channel_account:view', label: '查看渠道账号', desc: '查看账号列表' },
-      { key: 'channel_account:edit', label: '管理渠道账号', desc: '新增、启用/停用、重置密码' },
+      { key: 'channel_account:add', label: '新增渠道账号', desc: '创建渠道商登录账号' },
+      { key: 'channel_account:toggle', label: '启用/停用渠道账号', desc: '切换账号状态' },
+      { key: 'channel_account:reset_pwd', label: '重置密码', desc: '重置渠道商账号密码' },
     ],
   },
   {

@@ -11,7 +11,9 @@ export default function ChannelList() {
   const navigate = useNavigate();
   const { channels, addChannel, updateChannel, toggleStatus } = useChannels();
   const { hasPermission } = usePermission();
+  const canAdd = hasPermission('channel:add');
   const canEdit = hasPermission('channel:edit');
+  const canToggle = hasPermission('channel:toggle');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
@@ -98,7 +100,7 @@ export default function ChannelList() {
         <Space>
           {canEdit && <a onClick={() => openEdit(record)}>编辑</a>}
           <a onClick={() => navigate(`/channel/${record.id}`)}>渠道详情</a>
-          {canEdit && (
+          {canToggle && (
           <Popconfirm
             title={`确定${record.status === 'active' ? '停用' : '启用'}该渠道商？`}
             onConfirm={() => handleToggle(record.id)}
@@ -163,7 +165,7 @@ export default function ChannelList() {
       </div>
 
       <div className="table-toolbar">
-        {canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>}
+        {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>}
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 
