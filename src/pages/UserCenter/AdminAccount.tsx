@@ -86,12 +86,6 @@ export default function AdminAccountList() {
       ),
     },
     {
-      title: '权限数', key: 'permCount',
-      render: (_: unknown, record: AdminAccount) => (
-        <span>{record.isSuperAdmin ? '全部' : `${record.permissions.length} / ${ALL_PERMISSIONS.length}`}</span>
-      ),
-    },
-    {
       title: '状态', dataIndex: 'status', key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' ? 'green' : 'default'}>
