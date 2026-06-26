@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button, Dropdown, Avatar } from 'antd';
 import {
@@ -16,6 +16,9 @@ import {
   IdcardOutlined,
   SunOutlined,
   MoonOutlined,
+  SafetyCertificateOutlined,
+  FileTextOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
@@ -39,6 +42,12 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/order': { title: '订单管理' },
   '/transaction': { title: '交易明细' },
   '/settings': { title: '系统配置' },
+  '/settings/permission-group': { title: '权限分组管理', parent: '/settings' },
+  '/settings/permission-item': { title: '权限项管理', parent: '/settings' },
+  '/settings/report-template': { title: '报告模板', parent: '/settings' },
+  '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
+  '/settings/basic-params': { title: '基础参数', parent: '/settings' },
+  '/settings/notification': { title: '通知配置', parent: '/settings' },
   '/user-center': { title: '用户中心' },
   '/user-center/profile': { title: '基本信息', parent: '/user-center' },
 };
@@ -75,7 +84,40 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
     items.push({ key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' });
   }
   if (hasPermission('settings:view')) {
-    items.push({ key: '/settings', icon: <SettingOutlined />, label: '系统配置' });
+    items.push({
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: '系统配置',
+      children: [
+        {
+          key: '/settings/permission',
+          icon: <SafetyCertificateOutlined />,
+          label: '权限配置',
+          children: [
+            { key: '/settings/permission-group', label: '权限分组管理' },
+            { key: '/settings/permission-item', label: '权限项管理' },
+          ],
+        },
+        {
+          key: '/settings/report',
+          icon: <FileTextOutlined />,
+          label: '报告配置',
+          children: [
+            { key: '/settings/report-template', label: '报告模板' },
+            { key: '/settings/report-content', label: '报告内容设置' },
+          ],
+        },
+        {
+          key: '/settings/platform',
+          icon: <ToolOutlined />,
+          label: '平台设置',
+          children: [
+            { key: '/settings/basic-params', label: '基础参数' },
+            { key: '/settings/notification', label: '通知配置' },
+          ],
+        },
+      ],
+    });
   }
 
   const userCenterChildren: MenuProps['items'] = [
@@ -109,6 +151,11 @@ function getSelectedKey(pathname: string): string {
   if (pathname === '/') return '/';
   if (pathname.startsWith('/user-center/')) return pathname;
   if (pathname === '/user-center') return '/user-center/profile';
+  if (pathname.startsWith('/settings/permission-')) return pathname;
+  if (pathname.startsWith('/settings/report-')) return pathname;
+  if (pathname.startsWith('/settings/basic-')) return pathname;
+  if (pathname.startsWith('/settings/notification')) return pathname;
+  if (pathname === '/settings') return '/settings/permission-group';
   if (pathname.startsWith('/channel/my')) return '/channel/my';
   if (pathname.startsWith('/channel')) return '/channel';
   if (pathname.startsWith('/order')) return '/order';
@@ -117,12 +164,20 @@ function getSelectedKey(pathname: string): string {
 }
 
 function getOpenKeys(pathname: string): string[] {
-  if (pathname.startsWith('/user-center')) return ['/user-center'];
-  return [];
+  const keys: string[] = [];
+  if (pathname.startsWith('/user-center')) keys.push('/user-center');
+  if (pathname.startsWith('/settings')) {
+    keys.push('/settings');
+    if (pathname.includes('permission')) keys.push('/settings/permission');
+    if (pathname.includes('report')) keys.push('/settings/report');
+    if (pathname.includes('basic') || pathname.includes('notification')) keys.push('/settings/platform');
+  }
+  return keys;
 }
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -130,6 +185,14 @@ export default function AppLayout() {
   const { hasPermission, isSuperAdmin } = usePermission();
 
   const menuItems = user?.role === 'admin' ? buildAdminMenuItems(hasPermission, isSuperAdmin) : channelMenuItems;
+
+  useEffect(() => {
+    setOpenKeys((prev) => {
+      const fromPath = getOpenKeys(location.pathname);
+      const merged = new Set([...prev, ...fromPath]);
+      return Array.from(merged);
+    });
+  }, [location.pathname]);
   const breadcrumbs = getBreadcrumb(location.pathname);
 
   const dropdownItems: MenuProps['items'] = [
@@ -158,7 +221,8 @@ export default function AppLayout() {
         <Menu
           mode="inline"
           selectedKeys={[getSelectedKey(location.pathname)]}
-          defaultOpenKeys={getOpenKeys(location.pathname)}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
         />

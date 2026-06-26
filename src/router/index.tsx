@@ -9,7 +9,13 @@ import MyChannel from '@/pages/Channel/MyChannel';
 import AccountList from '@/pages/Account';
 import OrderList from '@/pages/Order';
 import TransactionList from '@/pages/Transaction';
-import Settings from '@/pages/Settings';
+import SettingsLayout from '@/pages/Settings';
+import PermissionGroup from '@/pages/Settings/PermissionGroup';
+import PermissionItem from '@/pages/Settings/PermissionItem';
+import ReportTemplate from '@/pages/Settings/ReportTemplate';
+import ReportContent from '@/pages/Settings/ReportContent';
+import BasicParams from '@/pages/Settings/BasicParams';
+import NotificationConfig from '@/pages/Settings/NotificationConfig';
 import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
 import AdminAccount from '@/pages/UserCenter/AdminAccount';
@@ -31,7 +37,19 @@ const router = createBrowserRouter([
       { path: 'account', element: <AuthGuard roles={['admin']}><AccountList /></AuthGuard> },
       { path: 'order', element: <OrderList /> },
       { path: 'transaction', element: <TransactionList /> },
-      { path: 'settings', element: <AuthGuard roles={['admin']}><Settings /></AuthGuard> },
+      {
+        path: 'settings',
+        element: <AuthGuard roles={['admin']}><SettingsLayout /></AuthGuard>,
+        children: [
+          { index: true, element: <Navigate to="permission-group" replace /> },
+          { path: 'permission-group', element: <PermissionGroup /> },
+          { path: 'permission-item', element: <PermissionItem /> },
+          { path: 'report-template', element: <ReportTemplate /> },
+          { path: 'report-content', element: <ReportContent /> },
+          { path: 'basic-params', element: <BasicParams /> },
+          { path: 'notification', element: <NotificationConfig /> },
+        ],
+      },
       {
         path: 'user-center',
         element: <UserCenter />,
