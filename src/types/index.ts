@@ -13,7 +13,8 @@ export type Permission =
   | 'channel_account:reset_pwd'
   | 'order:view'
   | 'transaction:view'
-  | 'settings:view';
+  | 'settings:view'
+  | 'my_channel:view';
 
 export const ALL_PERMISSIONS: Permission[] = [
   'channel:view',
@@ -68,6 +69,33 @@ export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label
     group: '系统配置',
     items: [
       { key: 'settings:view', label: '系统配置', desc: '查看和修改配置' },
+    ],
+  },
+];
+
+export const ALL_CHANNEL_PERMISSIONS: Permission[] = [
+  'my_channel:view',
+  'order:view',
+  'transaction:view',
+];
+
+export const CHANNEL_PERMISSION_GROUPS: { group: string; items: { key: Permission; label: string; desc: string }[] }[] = [
+  {
+    group: '渠道信息',
+    items: [
+      { key: 'my_channel:view', label: '查看渠道详情', desc: '查看本渠道详情信息' },
+    ],
+  },
+  {
+    group: '订单管理',
+    items: [
+      { key: 'order:view', label: '查看订单', desc: '查看订单列表和详情' },
+    ],
+  },
+  {
+    group: '交易明细',
+    items: [
+      { key: 'transaction:view', label: '查看交易明细', desc: '查看交易明细记录' },
     ],
   },
 ];
@@ -134,4 +162,5 @@ export interface Account {
   channelName: string;
   status: 'active' | 'inactive';
   createdAt: string;
+  permissions?: Permission[];
 }

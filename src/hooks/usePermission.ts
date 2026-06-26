@@ -1,4 +1,5 @@
 import { useAuth } from '@/store/useAuth';
+import { ALL_CHANNEL_PERMISSIONS } from '@/types';
 import type { Permission } from '@/types';
 
 export function usePermission() {
@@ -8,9 +9,21 @@ export function usePermission() {
   const isSuperAdmin = user?.role === 'admin' && (user.isSuperAdmin === true || (!('isSuperAdmin' in user) && !user.permissions));
 
   const hasPermission = (permission: Permission): boolean => {
-    if (!user || user.role !== 'admin') return false;
-    if (isSuperAdmin) return true;
-    return user.permissions?.includes(permission) ?? false;
+    if (!user) return false;
+
+    // admin角色
+    if (user.role === 'admin') {
+      if (isSuperAdmin) return true;
+      return user.permissions?.includes(permission) ?? false;
+    }
+
+    // channel角色：无permissions字段时默认拥有所有渠道权限（向后兼容）
+    if (user.role === 'channel') {
+      if (!user.permissions) return ALL_CHANNEL_PERMISSIONS.includes(permission);
+      return user.permissions.includes(permission);
+    }
+
+    return false;
   };
 
   return { hasPermission, isSuperAdmin };

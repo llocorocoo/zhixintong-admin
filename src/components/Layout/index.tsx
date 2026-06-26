@@ -134,18 +134,30 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
   return items;
 }
 
-const channelMenuItems: MenuProps['items'] = [
-  { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
-  { key: '/channel/my', icon: <LinkOutlined />, label: '渠道详情' },
-  { key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' },
-  { key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' },
-  {
+function buildChannelMenuItems(hasPermission: (p: Permission) => boolean): MenuProps['items'] {
+  const items: MenuProps['items'] = [
+    { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
+  ];
+
+  if (hasPermission('my_channel:view')) {
+    items.push({ key: '/channel/my', icon: <LinkOutlined />, label: '渠道详情' });
+  }
+  if (hasPermission('order:view')) {
+    items.push({ key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' });
+  }
+  if (hasPermission('transaction:view')) {
+    items.push({ key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' });
+  }
+
+  items.push({
     key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
     children: [
       { key: '/user-center/profile', label: '基本信息' },
     ],
-  },
-];
+  });
+
+  return items;
+}
 
 function getSelectedKey(pathname: string): string {
   if (pathname === '/') return '/';
@@ -184,7 +196,7 @@ export default function AppLayout() {
   const { mode, toggle } = useTheme();
   const { hasPermission, isSuperAdmin } = usePermission();
 
-  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(hasPermission, isSuperAdmin) : channelMenuItems;
+  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(hasPermission, isSuperAdmin) : buildChannelMenuItems(hasPermission);
 
   useEffect(() => {
     setOpenKeys((prev) => {

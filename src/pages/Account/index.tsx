@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
 import { useChannels } from '@/store/useChannels';
 import { usePermission } from '@/hooks/usePermission';
-import type { Account } from '@/types';
+import { CHANNEL_PERMISSION_GROUPS, ALL_CHANNEL_PERMISSIONS } from '@/types';
+import type { Account, Permission } from '@/types';
 
 export default function AccountList() {
   const { channels } = useChannels();
@@ -14,6 +15,9 @@ export default function AccountList() {
   const canResetPwd = hasPermission('channel_account:reset_pwd');
   const [accounts, setAccounts] = useState<Account[]>(mockAccounts);
   const [modalOpen, setModalOpen] = useState(false);
+  const [permModalOpen, setPermModalOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
 
   const toggleStatus = (id: string) => {
@@ -48,6 +52,23 @@ export default function AccountList() {
     });
   };
 
+  const openPermissions = (account: Account) => {
+    setEditingAccount(account);
+    setSelectedPerms(account.permissions ? [...account.permissions] : [...ALL_CHANNEL_PERMISSIONS]);
+    setPermModalOpen(true);
+  };
+
+  const savePermissions = () => {
+    if (!editingAccount) return;
+    setAccounts((prev) =>
+      prev.map((a) =>
+        a.id === editingAccount.id ? { ...a, permissions: selectedPerms } : a
+      )
+    );
+    setPermModalOpen(false);
+    message.success('权限已保存');
+  };
+
   const columns = [
     { title: '用户名', dataIndex: 'username', key: 'username' },
     { title: '姓名', dataIndex: 'name', key: 'name' },
@@ -65,6 +86,7 @@ export default function AccountList() {
       title: '操作', key: 'action',
       render: (_: unknown, record: Account) => (
         <Space>
+          <a onClick={() => openPermissions(record)}>权限</a>
           {canToggle && (
             <Popconfirm
               title={`确定${record.status === 'active' ? '停用' : '启用'}该账号？`}
@@ -117,6 +139,50 @@ export default function AccountList() {
             <Input placeholder="请输入姓名" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 权限配置弹窗 */}
+      <Modal
+        title={`权限配置 — ${editingAccount?.name || ''}`}
+        open={permModalOpen}
+        onOk={savePermissions}
+        onCancel={() => setPermModalOpen(false)}
+        okText="保存"
+        cancelText="取消"
+        width={520}
+      >
+        <div style={{ marginTop: 8 }}>
+          <div style={{ marginBottom: 12 }}>
+            <Checkbox
+              checked={selectedPerms.length === ALL_CHANNEL_PERMISSIONS.length}
+              indeterminate={selectedPerms.length > 0 && selectedPerms.length < ALL_CHANNEL_PERMISSIONS.length}
+              onChange={(e) => setSelectedPerms(e.target.checked ? [...ALL_CHANNEL_PERMISSIONS] : [])}
+            >
+              全选
+            </Checkbox>
+          </div>
+          {CHANNEL_PERMISSION_GROUPS.map((group) => (
+            <div key={group.group} style={{ marginBottom: 16 }}>
+              <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
+              {group.items.map((item) => (
+                <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Checkbox
+                    checked={selectedPerms.includes(item.key)}
+                    onChange={(e) => {
+                      setSelectedPerms(e.target.checked
+                        ? [...selectedPerms, item.key]
+                        : selectedPerms.filter((p) => p !== item.key)
+                      );
+                    }}
+                  >
+                    {item.label}
+                  </Checkbox>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </Modal>
     </>
   );
