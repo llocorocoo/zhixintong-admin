@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { Tree } from 'antd';
+import { Menu } from 'antd';
 import {
-  SafetyCertificateOutlined,
-  FileTextOutlined,
-  ToolOutlined,
   TeamOutlined,
   KeyOutlined,
   FileSearchOutlined,
@@ -11,7 +8,7 @@ import {
   SettingOutlined,
   BellOutlined,
 } from '@ant-design/icons';
-import type { TreeDataNode } from 'antd';
+import type { MenuProps } from 'antd';
 import PermissionGroup from './PermissionGroup';
 import PermissionItem from './PermissionItem';
 import ReportTemplate from './ReportTemplate';
@@ -19,34 +16,13 @@ import ReportContent from './ReportContent';
 import BasicParams from './BasicParams';
 import NotificationConfig from './NotificationConfig';
 
-const treeData: TreeDataNode[] = [
-  {
-    title: '权限配置',
-    key: 'permission',
-    icon: <SafetyCertificateOutlined />,
-    children: [
-      { title: '权限分组管理', key: 'permission-group', icon: <TeamOutlined /> },
-      { title: '权限项管理', key: 'permission-item', icon: <KeyOutlined /> },
-    ],
-  },
-  {
-    title: '报告配置',
-    key: 'report',
-    icon: <FileTextOutlined />,
-    children: [
-      { title: '报告模板', key: 'report-template', icon: <FileSearchOutlined /> },
-      { title: '报告内容设置', key: 'report-content', icon: <EditOutlined /> },
-    ],
-  },
-  {
-    title: '平台设置',
-    key: 'platform',
-    icon: <ToolOutlined />,
-    children: [
-      { title: '基础参数', key: 'basic-params', icon: <SettingOutlined /> },
-      { title: '通知配置', key: 'notification', icon: <BellOutlined /> },
-    ],
-  },
+const menuItems: MenuProps['items'] = [
+  { key: 'permission-group', icon: <TeamOutlined />, label: '权限分组管理' },
+  { key: 'permission-item', icon: <KeyOutlined />, label: '权限项管理' },
+  { key: 'report-template', icon: <FileSearchOutlined />, label: '报告模板' },
+  { key: 'report-content', icon: <EditOutlined />, label: '报告内容设置' },
+  { key: 'basic-params', icon: <SettingOutlined />, label: '基础参数' },
+  { key: 'notification', icon: <BellOutlined />, label: '通知配置' },
 ];
 
 const contentMap: Record<string, React.ReactNode> = {
@@ -70,18 +46,11 @@ const titleMap: Record<string, string> = {
 export default function Settings() {
   const [selectedKey, setSelectedKey] = useState('permission-group');
 
-  const onSelect = (keys: React.Key[]) => {
-    const key = keys[0] as string;
-    if (key && contentMap[key]) {
-      setSelectedKey(key);
-    }
-  };
-
   return (
     <div style={{ display: 'flex', gap: 16, minHeight: 'calc(100vh - 160px)' }}>
       <div
         style={{
-          width: 220,
+          width: 200,
           flexShrink: 0,
           background: 'var(--content-bg)',
           borderRadius: 8,
@@ -101,13 +70,12 @@ export default function Settings() {
         >
           系统配置
         </div>
-        <Tree
-          showIcon
-          defaultExpandAll
+        <Menu
+          mode="inline"
           selectedKeys={[selectedKey]}
-          onSelect={onSelect}
-          treeData={treeData}
-          style={{ background: 'transparent' }}
+          items={menuItems}
+          onClick={({ key }) => setSelectedKey(key)}
+          style={{ border: 'none', background: 'transparent' }}
         />
       </div>
 
