@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, message, Popconfirm, Checkbox } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS } from '@/types';
 import type { Permission } from '@/types';
+import { mockRoles } from '@/mock/data';
 
 interface AdminAccount {
   id: string;
   username: string;
   name: string;
+  roleId?: string;
   isSuperAdmin: boolean;
   permissions: Permission[];
   status: 'active' | 'inactive';
@@ -24,7 +26,17 @@ export default function AdminAccountList() {
   const [permModalOpen, setPermModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AdminAccount | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
+  const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
+
+  const adminRoles = mockRoles.filter((r) => r.dataScope === 'all' && r.status === 'active');
+
+  const handleRoleChange = (roleId: string) => {
+    const role = mockRoles.find((r) => r.id === roleId);
+    if (role) {
+      setCreatePerms([...role.defaultPermissions]);
+    }
+  };
 
   const toggleStatus = (id: string) => {
     setAccounts((prev) =>
@@ -45,14 +57,16 @@ export default function AdminAccountList() {
         id: 'adm' + Date.now(),
         username: values.username,
         name: values.name,
+        roleId: values.roleId,
         isSuperAdmin: false,
-        permissions: [],
+        permissions: [...createPerms],
         status: 'active',
         createdAt: new Date().toISOString().split('T')[0],
       };
       setAccounts((prev) => [...prev, newAccount]);
       setModalOpen(false);
       form.resetFields();
+      setCreatePerms([]);
       message.success('管理员账号创建成功');
     });
   };
@@ -134,9 +148,10 @@ export default function AdminAccountList() {
         title="新增管理员账号"
         open={modalOpen}
         onOk={handleAdd}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => { setModalOpen(false); setCreatePerms([]); }}
         okText="创建"
         cancelText="取消"
+        width={600}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入' }]}>
@@ -148,7 +163,47 @@ export default function AdminAccountList() {
           <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
             <Input.Password placeholder="请输入登录密码" />
           </Form.Item>
+          <Form.Item name="roleId" label="角色">
+            <Select placeholder="请选择角色" allowClear onChange={handleRoleChange}>
+              {adminRoles.map((r) => (
+                <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
+        <div style={{ marginTop: 8 }}>
+          <div style={{ margin: '8px 0', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>权限配置</div>
+          <div style={{ marginBottom: 12 }}>
+            <Checkbox
+              checked={createPerms.length === ALL_PERMISSIONS.length}
+              indeterminate={createPerms.length > 0 && createPerms.length < ALL_PERMISSIONS.length}
+              onChange={(e) => setCreatePerms(e.target.checked ? [...ALL_PERMISSIONS] : [])}
+            >
+              全选
+            </Checkbox>
+          </div>
+          {PERMISSION_GROUPS.map((group) => (
+            <div key={group.group} style={{ marginBottom: 16 }}>
+              <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
+              {group.items.map((item) => (
+                <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Checkbox
+                    checked={createPerms.includes(item.key)}
+                    onChange={(e) => {
+                      setCreatePerms(e.target.checked
+                        ? [...createPerms, item.key]
+                        : createPerms.filter((p) => p !== item.key)
+                      );
+                    }}
+                  >
+                    {item.label}
+                  </Checkbox>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </Modal>
 
       {/* 权限配置弹窗 */}

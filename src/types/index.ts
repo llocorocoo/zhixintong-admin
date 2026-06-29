@@ -1,4 +1,17 @@
-export type Role = 'admin' | 'channel';
+export type RoleType = 'admin' | 'channel';
+
+export type DataScope = 'all' | 'channel';
+
+export interface SysRole {
+  id: string;
+  name: string;
+  roleKey: string;
+  dataScope: DataScope;
+  defaultPermissions: Permission[];
+  status: 'active' | 'inactive';
+  remark?: string;
+  createdAt: string;
+}
 
 export type Permission =
   | 'channel:view'
@@ -104,7 +117,8 @@ export interface User {
   id: string;
   username: string;
   name: string;
-  role: Role;
+  role: RoleType;
+  roleId?: string;
   channelId?: string;
   isSuperAdmin?: boolean;
   permissions?: Permission[];
@@ -158,6 +172,7 @@ export interface Account {
   id: string;
   username: string;
   name: string;
+  roleId?: string;
   channelId: string;
   channelName: string;
   status: 'active' | 'inactive';

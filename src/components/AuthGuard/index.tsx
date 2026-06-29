@@ -1,10 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/store/useAuth';
-import type { Role } from '@/types';
+import type { RoleType } from '@/types';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  roles?: Role[];
+  roles?: RoleType[];
 }
 
 export default function AuthGuard({ children, roles }: AuthGuardProps) {

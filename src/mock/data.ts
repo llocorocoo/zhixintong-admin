@@ -1,4 +1,5 @@
-import type { Channel, Order, Transaction, Account, User } from '@/types';
+import type { Channel, Order, Transaction, Account, User, SysRole } from '@/types';
+import { ALL_PERMISSIONS, ALL_CHANNEL_PERMISSIONS } from '@/types';
 
 export const mockUsers: (User & { password: string })[] = [
   { id: '1', username: 'admin', password: 'admin123', name: '系统管理员', role: 'admin', isSuperAdmin: true },
@@ -52,6 +53,12 @@ export const mockTransactions: Transaction[] = [
   { id: 't6', transactionNo: 'TXN20240604001', orderNo: 'ORD20240604001', type: 'income', amount: 99.9, channelId: 'ch4', channelName: '鼎信服务', createdAt: '2024-06-04 08:30:05' },
   { id: 't7', transactionNo: 'TXN20240605001', orderNo: 'ORD20240605001', type: 'income', amount: 29.9, channelId: 'ch1', channelName: '信达渠道', createdAt: '2024-06-05 12:00:05' },
   { id: 't8', transactionNo: 'TXN20240606001', orderNo: 'ORD20240606001', type: 'income', amount: 59.9, channelId: 'ch4', channelName: '鼎信服务', createdAt: '2024-06-06 10:10:05' },
+];
+
+export const mockRoles: SysRole[] = [
+  { id: 'role1', name: '超级管理员', roleKey: 'super_admin', dataScope: 'all', defaultPermissions: [...ALL_PERMISSIONS], status: 'active', createdAt: '2024-01-01' },
+  { id: 'role2', name: '管理员', roleKey: 'admin', dataScope: 'all', defaultPermissions: [], status: 'active', remark: '权限按需分配', createdAt: '2024-01-01' },
+  { id: 'role3', name: '渠道商', roleKey: 'channel', dataScope: 'channel', defaultPermissions: [...ALL_CHANNEL_PERMISSIONS], status: 'active', createdAt: '2024-01-01' },
 ];
 
 export const mockAccounts: Account[] = [

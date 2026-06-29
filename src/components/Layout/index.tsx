@@ -19,6 +19,7 @@ import {
   SafetyCertificateOutlined,
   FileTextOutlined,
   ToolOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
@@ -44,6 +45,7 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings': { title: '系统配置' },
   '/settings/permission-group': { title: '权限分组管理', parent: '/settings' },
   '/settings/permission-item': { title: '权限项管理', parent: '/settings' },
+  '/settings/role': { title: '角色管理', parent: '/settings' },
   '/settings/report-template': { title: '报告模板', parent: '/settings' },
   '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
   '/settings/basic-params': { title: '基础参数', parent: '/settings' },
@@ -98,6 +100,7 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
             { key: '/settings/permission-item', label: '权限项管理' },
           ],
         },
+        { key: '/settings/role', icon: <CrownOutlined />, label: '角色管理' },
         {
           key: '/settings/report',
           icon: <FileTextOutlined />,
@@ -164,6 +167,7 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/user-center/')) return pathname;
   if (pathname === '/user-center') return '/user-center/profile';
   if (pathname.startsWith('/settings/permission-')) return pathname;
+  if (pathname.startsWith('/settings/role')) return '/settings/role';
   if (pathname.startsWith('/settings/report-')) return pathname;
   if (pathname.startsWith('/settings/basic-')) return pathname;
   if (pathname.startsWith('/settings/notification')) return pathname;
