@@ -19,6 +19,7 @@ import NotificationConfig from '@/pages/Settings/NotificationConfig';
 import RoleManagement from '@/pages/Settings/RoleManagement';
 import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
+import DictManagement from '@/pages/Settings/DictManagement';
 import AdminAccount from '@/pages/UserCenter/AdminAccount';
 
 const router = createBrowserRouter([
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
           { path: 'permission-item', element: <PermissionItem /> },
           { path: 'role', element: <RoleManagement /> },
           { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
+          { path: 'dict', element: <DictManagement /> },
           { path: 'report-template', element: <ReportTemplate /> },
           { path: 'report-content', element: <ReportContent /> },
           { path: 'basic-params', element: <BasicParams /> },
