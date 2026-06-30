@@ -36,16 +36,17 @@ interface BreadcrumbItem {
 
 const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/': { title: '仪表盘' },
-  '/channel': { title: '渠道商管理' },
+  '/channel': { title: '渠道商列表', parent: '/channel-mgmt' },
   '/channel/my': { title: '渠道详情' },
-  '/account': { title: '渠道账号管理' },
-  '/user-center/admin-account': { title: '管理员账号', parent: '/user-center' },
+  '/account': { title: '渠道账号', parent: '/channel-mgmt' },
+  '/channel-mgmt': { title: '渠道管理' },
   '/order': { title: '订单管理' },
   '/transaction': { title: '交易明细' },
   '/settings': { title: '系统配置' },
   '/settings/permission-group': { title: '权限分组管理', parent: '/settings' },
   '/settings/permission-item': { title: '权限项管理', parent: '/settings' },
   '/settings/role': { title: '角色管理', parent: '/settings' },
+  '/settings/admin-account': { title: '管理员账号', parent: '/settings' },
   '/settings/report-template': { title: '报告模板', parent: '/settings' },
   '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
   '/settings/basic-params': { title: '基础参数', parent: '/settings' },
@@ -63,7 +64,7 @@ function getBreadcrumb(pathname: string): string[] {
     }
     return [item.title];
   }
-  if (pathname.startsWith('/channel/')) return ['渠道商管理', '渠道商详情'];
+  if (pathname.startsWith('/channel/')) return ['渠道管理', '渠道商详情'];
   if (pathname.startsWith('/order/')) return ['订单管理', '订单详情'];
   return [''];
 }
@@ -73,12 +74,23 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
     { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
   ];
 
+  // 渠道管理（合并渠道商列表 + 渠道账号）
+  const channelChildren: MenuProps['items'] = [];
   if (hasPermission('channel:view')) {
-    items.push({ key: '/channel', icon: <TeamOutlined />, label: '渠道商管理' });
+    channelChildren.push({ key: '/channel', label: '渠道商列表' });
   }
   if (hasPermission('channel_account:view')) {
-    items.push({ key: '/account', icon: <UserOutlined />, label: '渠道账号管理' });
+    channelChildren.push({ key: '/account', label: '渠道账号' });
   }
+  if (channelChildren.length > 0) {
+    items.push({
+      key: '/channel-mgmt',
+      icon: <TeamOutlined />,
+      label: '渠道管理',
+      children: channelChildren,
+    });
+  }
+
   if (hasPermission('order:view')) {
     items.push({ key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' });
   }
@@ -86,52 +98,54 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
     items.push({ key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' });
   }
   if (hasPermission('settings:view')) {
+    const settingsChildren: MenuProps['items'] = [
+      {
+        key: '/settings/permission',
+        icon: <SafetyCertificateOutlined />,
+        label: '权限配置',
+        children: [
+          { key: '/settings/permission-group', label: '权限分组管理' },
+          { key: '/settings/permission-item', label: '权限项管理' },
+        ],
+      },
+      { key: '/settings/role', icon: <CrownOutlined />, label: '角色管理' },
+    ];
+    if (isSuperAdmin) {
+      settingsChildren.push({ key: '/settings/admin-account', icon: <UserOutlined />, label: '管理员账号' });
+    }
+    settingsChildren.push(
+      {
+        key: '/settings/report',
+        icon: <FileTextOutlined />,
+        label: '报告配置',
+        children: [
+          { key: '/settings/report-template', label: '报告模板' },
+          { key: '/settings/report-content', label: '报告内容设置' },
+        ],
+      },
+      {
+        key: '/settings/platform',
+        icon: <ToolOutlined />,
+        label: '平台设置',
+        children: [
+          { key: '/settings/basic-params', label: '基础参数' },
+          { key: '/settings/notification', label: '通知配置' },
+        ],
+      },
+    );
     items.push({
       key: '/settings',
       icon: <SettingOutlined />,
       label: '系统配置',
-      children: [
-        {
-          key: '/settings/permission',
-          icon: <SafetyCertificateOutlined />,
-          label: '权限配置',
-          children: [
-            { key: '/settings/permission-group', label: '权限分组管理' },
-            { key: '/settings/permission-item', label: '权限项管理' },
-          ],
-        },
-        { key: '/settings/role', icon: <CrownOutlined />, label: '角色管理' },
-        {
-          key: '/settings/report',
-          icon: <FileTextOutlined />,
-          label: '报告配置',
-          children: [
-            { key: '/settings/report-template', label: '报告模板' },
-            { key: '/settings/report-content', label: '报告内容设置' },
-          ],
-        },
-        {
-          key: '/settings/platform',
-          icon: <ToolOutlined />,
-          label: '平台设置',
-          children: [
-            { key: '/settings/basic-params', label: '基础参数' },
-            { key: '/settings/notification', label: '通知配置' },
-          ],
-        },
-      ],
+      children: settingsChildren,
     });
   }
 
-  const userCenterChildren: MenuProps['items'] = [
-    { key: '/user-center/profile', label: '基本信息' },
-  ];
-  if (isSuperAdmin) {
-    userCenterChildren.push({ key: '/user-center/admin-account', label: '管理员账号' });
-  }
   items.push({
-    key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
-    children: userCenterChildren,
+    key: '/user-center', icon: <IdcardOutlined />, label: '个人设置',
+    children: [
+      { key: '/user-center/profile', label: '基本信息' },
+    ],
   });
 
   return items;
@@ -168,10 +182,12 @@ function getSelectedKey(pathname: string): string {
   if (pathname === '/user-center') return '/user-center/profile';
   if (pathname.startsWith('/settings/permission-')) return pathname;
   if (pathname.startsWith('/settings/role')) return '/settings/role';
+  if (pathname.startsWith('/settings/admin-account')) return '/settings/admin-account';
   if (pathname.startsWith('/settings/report-')) return pathname;
   if (pathname.startsWith('/settings/basic-')) return pathname;
   if (pathname.startsWith('/settings/notification')) return pathname;
   if (pathname === '/settings') return '/settings/permission-group';
+  if (pathname === '/account') return '/account';
   if (pathname.startsWith('/channel/my')) return '/channel/my';
   if (pathname.startsWith('/channel')) return '/channel';
   if (pathname.startsWith('/order')) return '/order';
@@ -182,6 +198,7 @@ function getSelectedKey(pathname: string): string {
 function getOpenKeys(pathname: string): string[] {
   const keys: string[] = [];
   if (pathname.startsWith('/user-center')) keys.push('/user-center');
+  if (pathname.startsWith('/channel') || pathname.startsWith('/account')) keys.push('/channel-mgmt');
   if (pathname.startsWith('/settings')) {
     keys.push('/settings');
     if (pathname.includes('permission')) keys.push('/settings/permission');

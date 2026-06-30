@@ -46,6 +46,7 @@ const router = createBrowserRouter([
           { path: 'permission-group', element: <PermissionGroup /> },
           { path: 'permission-item', element: <PermissionItem /> },
           { path: 'role', element: <RoleManagement /> },
+          { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
           { path: 'report-template', element: <ReportTemplate /> },
           { path: 'report-content', element: <ReportContent /> },
           { path: 'basic-params', element: <BasicParams /> },
@@ -58,7 +59,6 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="profile" replace /> },
           { path: 'profile', element: <Profile /> },
-          { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
         ],
       },
     ],
