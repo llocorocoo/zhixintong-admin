@@ -87,14 +87,6 @@ export default function RoleManagement() {
     { title: '角色名称', dataIndex: 'name', key: 'name' },
     { title: '权限字符', dataIndex: 'roleKey', key: 'roleKey' },
     {
-      title: '数据范围', dataIndex: 'dataScope', key: 'dataScope',
-      render: (scope: DataScope) => (
-        <Tag color={scope === 'all' ? 'blue' : 'orange'}>
-          {scope === 'all' ? '全部数据' : '本渠道数据'}
-        </Tag>
-      ),
-    },
-    {
       title: '状态', dataIndex: 'status', key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' ? 'green' : 'default'}>
