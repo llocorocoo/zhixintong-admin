@@ -7,7 +7,8 @@ import type { SysRole, Permission } from '@/types';
 
 export default function ChannelRoleManagement() {
   const { roles, addRole, updateRole, deleteRole } = useRoles();
-  const channelRoles = roles.filter((r) => r.dataScope === 'channel');
+  const SYSTEM_ROLE_KEYS = ['super_admin', 'admin', 'channel'];
+  const channelRoles = roles.filter((r) => r.dataScope === 'channel' && !SYSTEM_ROLE_KEYS.includes(r.roleKey));
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<SysRole | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);

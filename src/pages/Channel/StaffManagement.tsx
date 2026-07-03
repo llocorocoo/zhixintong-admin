@@ -12,7 +12,8 @@ export default function StaffManagement() {
   const { user } = useAuth();
   const { roles } = useRoles();
   const { channels } = useChannels();
-  const channelRoles = roles.filter((r) => r.dataScope === 'channel' && r.status === 'active');
+  const SYSTEM_ROLE_KEYS = ['super_admin', 'admin', 'channel'];
+  const channelRoles = roles.filter((r) => r.dataScope === 'channel' && r.status === 'active' && !SYSTEM_ROLE_KEYS.includes(r.roleKey));
   const myChannel = channels.find((c) => c.id === user?.channelId);
 
   const [accounts, setAccounts] = useState<Account[]>(
