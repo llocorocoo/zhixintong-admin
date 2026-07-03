@@ -21,6 +21,8 @@ import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
 import DictManagement from '@/pages/Settings/DictManagement';
 import AdminAccount from '@/pages/UserCenter/AdminAccount';
+import ChannelRoleManagement from '@/pages/Channel/RoleManagement';
+import StaffManagement from '@/pages/Channel/StaffManagement';
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
@@ -55,6 +57,8 @@ const router = createBrowserRouter([
           { path: 'notification', element: <NotificationConfig /> },
         ],
       },
+      { path: 'channel-settings/role', element: <AuthGuard roles={['channel']}><ChannelRoleManagement /></AuthGuard> },
+      { path: 'channel-settings/staff', element: <AuthGuard roles={['channel']}><StaffManagement /></AuthGuard> },
       {
         path: 'user-center',
         element: <UserCenter />,

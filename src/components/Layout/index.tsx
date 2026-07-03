@@ -54,6 +54,9 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings/report-template': { title: '报告模板', parent: '/settings' },
   '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
   '/settings/notification': { title: '通知配置', parent: '/settings' },
+  '/channel-settings': { title: '渠道设置' },
+  '/channel-settings/role': { title: '角色管理', parent: '/channel-settings' },
+  '/channel-settings/staff': { title: '员工管理', parent: '/channel-settings' },
   '/user-center': { title: '用户中心' },
   '/user-center/profile': { title: '基本信息', parent: '/user-center' },
 };
@@ -164,6 +167,16 @@ function buildChannelMenuItems(hasPermission: (p: Permission) => boolean): MenuP
   }
 
   items.push({
+    key: '/channel-settings',
+    icon: <SettingOutlined />,
+    label: '渠道设置',
+    children: [
+      { key: '/channel-settings/role', icon: <CrownOutlined />, label: '角色管理' },
+      { key: '/channel-settings/staff', icon: <TeamOutlined />, label: '员工管理' },
+    ],
+  });
+
+  items.push({
     key: '/user-center', icon: <IdcardOutlined />, label: '用户中心',
     children: [
       { key: '/user-center/profile', label: '基本信息' },
@@ -185,6 +198,7 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/settings/report-')) return pathname;
   if (pathname.startsWith('/settings/notification')) return pathname;
   if (pathname === '/settings') return '/settings/permission-group';
+  if (pathname.startsWith('/channel-settings/')) return pathname;
   if (pathname === '/account') return '/account';
   if (pathname.startsWith('/channel/my')) return '/channel/my';
   if (pathname.startsWith('/channel')) return '/channel';
@@ -196,7 +210,8 @@ function getSelectedKey(pathname: string): string {
 function getOpenKeys(pathname: string): string[] {
   const keys: string[] = [];
   if (pathname.startsWith('/user-center')) keys.push('/user-center');
-  if (pathname.startsWith('/channel') || pathname.startsWith('/account')) keys.push('/channel-mgmt');
+  if (pathname.startsWith('/channel-settings')) keys.push('/channel-settings');
+  else if (pathname.startsWith('/channel') || pathname.startsWith('/account')) keys.push('/channel-mgmt');
   if (pathname.startsWith('/settings')) {
     keys.push('/settings');
     if (pathname.includes('permission')) keys.push('/settings/permission');
