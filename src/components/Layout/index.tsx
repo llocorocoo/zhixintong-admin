@@ -18,9 +18,10 @@ import {
   MoonOutlined,
   SafetyCertificateOutlined,
   FileTextOutlined,
-  ToolOutlined,
   CrownOutlined,
   BookOutlined,
+  BellOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
@@ -47,11 +48,11 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings/permission-group': { title: '权限分组管理', parent: '/settings' },
   '/settings/permission-item': { title: '权限项管理', parent: '/settings' },
   '/settings/role': { title: '角色管理', parent: '/settings' },
-  '/settings/admin-account': { title: '管理员账号', parent: '/settings' },
+  '/settings/admin-account': { title: '系统账号管理', parent: '/settings' },
+  '/settings/menu': { title: '菜单管理', parent: '/settings' },
   '/settings/dict': { title: '字典管理', parent: '/settings' },
   '/settings/report-template': { title: '报告模板', parent: '/settings' },
   '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
-  '/settings/basic-params': { title: '基础参数', parent: '/settings' },
   '/settings/notification': { title: '通知配置', parent: '/settings' },
   '/user-center': { title: '用户中心' },
   '/user-center/profile': { title: '基本信息', parent: '/user-center' },
@@ -111,14 +112,13 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
         ],
       },
       { key: '/settings/role', icon: <CrownOutlined />, label: '角色管理' },
+      { key: '/settings/menu', icon: <AppstoreOutlined />, label: '菜单管理' },
     ];
     if (isSuperAdmin) {
-      settingsChildren.push({ key: '/settings/admin-account', icon: <UserOutlined />, label: '管理员账号' });
+      settingsChildren.push({ key: '/settings/admin-account', icon: <UserOutlined />, label: '系统账号管理' });
     }
     settingsChildren.push(
       { key: '/settings/dict', icon: <BookOutlined />, label: '字典管理' },
-    );
-    settingsChildren.push(
       {
         key: '/settings/report',
         icon: <FileTextOutlined />,
@@ -128,15 +128,7 @@ function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperA
           { key: '/settings/report-content', label: '报告内容设置' },
         ],
       },
-      {
-        key: '/settings/platform',
-        icon: <ToolOutlined />,
-        label: '平台设置',
-        children: [
-          { key: '/settings/basic-params', label: '基础参数' },
-          { key: '/settings/notification', label: '通知配置' },
-        ],
-      },
+      { key: '/settings/notification', icon: <BellOutlined />, label: '通知配置' },
     );
     items.push({
       key: '/settings',
@@ -188,9 +180,9 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/settings/permission-')) return pathname;
   if (pathname.startsWith('/settings/role')) return '/settings/role';
   if (pathname.startsWith('/settings/admin-account')) return '/settings/admin-account';
+  if (pathname.startsWith('/settings/menu')) return '/settings/menu';
   if (pathname.startsWith('/settings/dict')) return '/settings/dict';
   if (pathname.startsWith('/settings/report-')) return pathname;
-  if (pathname.startsWith('/settings/basic-')) return pathname;
   if (pathname.startsWith('/settings/notification')) return pathname;
   if (pathname === '/settings') return '/settings/permission-group';
   if (pathname === '/account') return '/account';
@@ -209,7 +201,6 @@ function getOpenKeys(pathname: string): string[] {
     keys.push('/settings');
     if (pathname.includes('permission')) keys.push('/settings/permission');
     if (pathname.includes('report')) keys.push('/settings/report');
-    if (pathname.includes('basic') || pathname.includes('notification')) keys.push('/settings/platform');
   }
   return keys;
 }

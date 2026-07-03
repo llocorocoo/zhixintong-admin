@@ -14,9 +14,9 @@ import PermissionGroup from '@/pages/Settings/PermissionGroup';
 import PermissionItem from '@/pages/Settings/PermissionItem';
 import ReportTemplate from '@/pages/Settings/ReportTemplate';
 import ReportContent from '@/pages/Settings/ReportContent';
-import BasicParams from '@/pages/Settings/BasicParams';
 import NotificationConfig from '@/pages/Settings/NotificationConfig';
 import RoleManagement from '@/pages/Settings/RoleManagement';
+import MenuManagement from '@/pages/Settings/MenuManagement';
 import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
 import DictManagement from '@/pages/Settings/DictManagement';
@@ -47,11 +47,11 @@ const router = createBrowserRouter([
           { path: 'permission-group', element: <PermissionGroup /> },
           { path: 'permission-item', element: <PermissionItem /> },
           { path: 'role', element: <RoleManagement /> },
+          { path: 'menu', element: <MenuManagement /> },
           { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
           { path: 'dict', element: <DictManagement /> },
           { path: 'report-template', element: <ReportTemplate /> },
           { path: 'report-content', element: <ReportContent /> },
-          { path: 'basic-params', element: <BasicParams /> },
           { path: 'notification', element: <NotificationConfig /> },
         ],
       },
