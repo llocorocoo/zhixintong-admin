@@ -54,7 +54,7 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings/report-template': { title: '报告模板', parent: '/settings' },
   '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
   '/settings/notification': { title: '通知配置', parent: '/settings' },
-  '/channel-settings': { title: '渠道设置' },
+  '/channel-settings': { title: '账号管理' },
   '/channel-settings/role': { title: '角色管理', parent: '/channel-settings' },
   '/channel-settings/staff': { title: '员工管理', parent: '/channel-settings' },
   '/user-center': { title: '用户中心' },
@@ -169,7 +169,7 @@ function buildChannelMenuItems(hasPermission: (p: Permission) => boolean): MenuP
   items.push({
     key: '/channel-settings',
     icon: <SettingOutlined />,
-    label: '渠道设置',
+    label: '账号管理',
     children: [
       { key: '/channel-settings/role', icon: <CrownOutlined />, label: '角色管理' },
       { key: '/channel-settings/staff', icon: <TeamOutlined />, label: '员工管理' },
