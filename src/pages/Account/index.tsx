@@ -6,7 +6,7 @@ import { useChannels } from '@/store/useChannels';
 import { usePermission } from '@/hooks/usePermission';
 import { CHANNEL_PERMISSION_GROUPS, ALL_CHANNEL_PERMISSIONS } from '@/types';
 import type { Account, Permission } from '@/types';
-import { mockRoles } from '@/mock/data';
+import { useRoles } from '@/store/useRoles';
 
 export default function AccountList() {
   const { channels } = useChannels();
@@ -22,10 +22,11 @@ export default function AccountList() {
   const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
 
-  const channelRoles = mockRoles.filter((r) => r.dataScope === 'channel' && r.status === 'active');
+  const { roles } = useRoles();
+  const channelRoles = roles.filter((r) => r.dataScope === 'channel' && r.status === 'active');
 
   const handleRoleChange = (roleId: string) => {
-    const role = mockRoles.find((r) => r.id === roleId);
+    const role = roles.find((r) => r.id === roleId);
     if (role) {
       setCreatePerms([...role.defaultPermissions]);
     }

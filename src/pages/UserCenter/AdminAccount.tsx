@@ -3,7 +3,7 @@ import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconf
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { PERMISSION_GROUPS, ALL_PERMISSIONS } from '@/types';
 import type { Permission } from '@/types';
-import { mockRoles } from '@/mock/data';
+import { useRoles } from '@/store/useRoles';
 
 interface AdminAccount {
   id: string;
@@ -29,10 +29,11 @@ export default function AdminAccountList() {
   const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
 
-  const adminRoles = mockRoles.filter((r) => r.dataScope === 'all' && r.status === 'active');
+  const { roles } = useRoles();
+  const adminRoles = roles.filter((r) => r.dataScope === 'all' && r.status === 'active');
 
   const handleRoleChange = (roleId: string) => {
-    const role = mockRoles.find((r) => r.id === roleId);
+    const role = roles.find((r) => r.id === roleId);
     if (role) {
       setCreatePerms([...role.defaultPermissions]);
     }

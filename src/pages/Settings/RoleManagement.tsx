@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { mockRoles } from '@/mock/data';
+import { useRoles } from '@/store/useRoles';
 import {
   PERMISSION_GROUPS,
   ALL_PERMISSIONS,
@@ -11,7 +11,7 @@ import {
 import type { SysRole, DataScope, Permission } from '@/types';
 
 export default function RoleManagement() {
-  const [roles, setRoles] = useState<SysRole[]>(mockRoles);
+  const { roles, addRole, updateRole, deleteRole } = useRoles();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<SysRole | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
@@ -47,16 +47,17 @@ export default function RoleManagement() {
   const handleSave = () => {
     form.validateFields().then((values) => {
       if (editingRole) {
-        setRoles((prev) =>
-          prev.map((r) =>
-            r.id === editingRole.id
-              ? { ...r, name: values.name, roleKey: values.roleKey, dataScope: values.dataScope, status: values.status, remark: values.remark, defaultPermissions: selectedPerms }
-              : r
-          )
-        );
+        updateRole(editingRole.id, {
+          name: values.name,
+          roleKey: values.roleKey,
+          dataScope: values.dataScope,
+          status: values.status,
+          remark: values.remark,
+          defaultPermissions: selectedPerms,
+        });
         message.success('角色已更新');
       } else {
-        const newRole: SysRole = {
+        addRole({
           id: 'role' + Date.now(),
           name: values.name,
           roleKey: values.roleKey,
@@ -65,8 +66,7 @@ export default function RoleManagement() {
           status: values.status,
           remark: values.remark,
           createdAt: new Date().toISOString().split('T')[0],
-        };
-        setRoles((prev) => [...prev, newRole]);
+        });
         message.success('角色创建成功');
       }
       setModalOpen(false);
@@ -74,7 +74,7 @@ export default function RoleManagement() {
   };
 
   const handleDelete = (id: string) => {
-    setRoles((prev) => prev.filter((r) => r.id !== id));
+    deleteRole(id);
     message.success('角色已删除');
   };
 
