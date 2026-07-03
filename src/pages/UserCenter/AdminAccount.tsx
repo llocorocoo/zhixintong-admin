@@ -17,7 +17,7 @@ interface AdminAccount {
 }
 
 const initialAccounts: AdminAccount[] = [
-  { id: 'adm1', username: 'admin', name: '系统管理员', isSuperAdmin: true, permissions: [...ALL_PERMISSIONS], status: 'active', createdAt: '2024-01-01' },
+  { id: 'adm1', username: 'admin', name: '系统管理员', roleId: 'role1', isSuperAdmin: true, permissions: [...ALL_PERMISSIONS], status: 'active', createdAt: '2024-01-01' },
 ];
 
 export default function AdminAccountList() {
@@ -68,7 +68,7 @@ export default function AdminAccountList() {
       setModalOpen(false);
       form.resetFields();
       setCreatePerms([]);
-      message.success('管理员账号创建成功');
+      message.success('系统账号创建成功');
     });
   };
 
@@ -94,11 +94,10 @@ export default function AdminAccountList() {
     { title: '姓名', dataIndex: 'name', key: 'name' },
     {
       title: '角色', key: 'role',
-      render: (_: unknown, record: AdminAccount) => (
-        <Tag color={record.isSuperAdmin ? 'gold' : 'blue'}>
-          {record.isSuperAdmin ? '超级管理员' : '管理员'}
-        </Tag>
-      ),
+      render: (_: unknown, record: AdminAccount) => {
+        const role = roles.find((r) => r.id === record.roleId);
+        return <Tag color={record.isSuperAdmin ? 'gold' : 'blue'}>{role?.name || '未分配'}</Tag>;
+      },
     },
     {
       title: '状态', dataIndex: 'status', key: 'status',
@@ -146,7 +145,7 @@ export default function AdminAccountList() {
 
       {/* 新增账号弹窗 */}
       <Modal
-        title="新增管理员账号"
+        title="新增系统账号"
         open={modalOpen}
         onOk={handleAdd}
         onCancel={() => { setModalOpen(false); setCreatePerms([]); }}
@@ -164,8 +163,8 @@ export default function AdminAccountList() {
           <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
             <Input.Password placeholder="请输入登录密码" />
           </Form.Item>
-          <Form.Item name="roleId" label="角色">
-            <Select placeholder="请选择角色" allowClear onChange={handleRoleChange}>
+          <Form.Item name="roleId" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
+            <Select placeholder="请选择角色" onChange={handleRoleChange}>
               {adminRoles.map((r) => (
                 <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
               ))}
