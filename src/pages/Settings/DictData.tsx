@@ -21,9 +21,8 @@ const initialDictData: DictDataItem[] = [
   { id: 'dd5', dictCode: 'order_status', label: '未完成', value: 'pending', sort: 1, color: 'warning', status: 'active', remark: '' },
   { id: 'dd6', dictCode: 'order_status', label: '已完成', value: 'completed', sort: 2, color: 'success', status: 'active', remark: '' },
   { id: 'dd7', dictCode: 'order_status', label: '已取消', value: 'cancelled', sort: 3, color: 'danger', status: 'active', remark: '' },
-  { id: 'dd8', dictCode: 'report_type', label: '基础报告', value: 'basic', sort: 1, color: '', status: 'active', remark: '' },
-  { id: 'dd9', dictCode: 'report_type', label: '标准报告', value: 'standard', sort: 2, color: 'info', status: 'active', remark: '' },
-  { id: 'dd10', dictCode: 'report_type', label: '高级报告', value: 'premium', sort: 3, color: 'primary', status: 'active', remark: '' },
+  { id: 'dd8', dictCode: 'report_type', label: '职业信用报告', value: 'occupational', sort: 1, color: 'primary', status: 'active', remark: '' },
+  { id: 'dd9', dictCode: 'report_type', label: '提升信用报告', value: 'improvement', sort: 2, color: 'info', status: 'active', remark: '' },
   { id: 'dd11', dictCode: 'trade_flow_type', label: '收入', value: 'income', sort: 1, color: 'success', status: 'active', remark: '' },
   { id: 'dd12', dictCode: 'trade_flow_type', label: '退款', value: 'refund', sort: 2, color: 'danger', status: 'active', remark: '' },
 ];

@@ -15,7 +15,9 @@ export default function OrderList() {
   const allOrders = isAdmin ? mockOrders : mockOrders.filter((o) => o.channelId === user?.channelId);
 
   const [search, setSearch] = useState('');
+  const [reportTypeFilter, setReportTypeFilter] = useState<string | undefined>(undefined);
   const [channelFilter, setChannelFilter] = useState<string | undefined>(undefined);
+  const [channelTypeFilter, setChannelTypeFilter] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [searchForm] = Form.useForm();
@@ -23,8 +25,10 @@ export default function OrderList() {
   const channelTypeMap = new Map(mockChannels.map((c) => [c.id, c.type]));
 
   const filtered = allOrders.filter((o) => {
-    if (search && !o.orderNo.includes(search) && !o.userName.includes(search)) return false;
+    if (search && !o.orderNo.includes(search) && !o.userName.includes(search) && !o.userPhone.includes(search)) return false;
+    if (reportTypeFilter && o.reportType !== reportTypeFilter) return false;
     if (channelFilter && o.channelId !== channelFilter) return false;
+    if (channelTypeFilter && channelTypeMap.get(o.channelId) !== channelTypeFilter) return false;
     if (dateRange) {
       const orderDate = o.createdAt.split(' ')[0];
       if (orderDate < dateRange[0].format('YYYY-MM-DD') || orderDate > dateRange[1].format('YYYY-MM-DD')) return false;
@@ -35,7 +39,9 @@ export default function OrderList() {
   const handleReset = () => {
     searchForm.resetFields();
     setSearch('');
+    setReportTypeFilter(undefined);
     setChannelFilter(undefined);
+    setChannelTypeFilter(undefined);
     setDateRange(null);
   };
 
@@ -83,11 +89,25 @@ export default function OrderList() {
             <Col span={8}>
               <Form.Item label="关键词" name="search" style={{ width: '100%' }}>
                 <Input
-                  placeholder="订单号/用户姓名"
+                  placeholder="订单号/用户姓名/手机号"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   allowClear
                 />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="报告类型" name="reportType" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部类型"
+                  allowClear
+                  value={reportTypeFilter}
+                  onChange={setReportTypeFilter}
+                >
+                  {Object.entries(REPORT_TYPE_MAP).map(([value, label]) => (
+                    <Select.Option key={value} value={value}>{label}</Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             {isAdmin && (
@@ -101,6 +121,22 @@ export default function OrderList() {
                   >
                     {mockChannels.map((c) => (
                       <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
+            {isAdmin && (
+              <Col span={8}>
+                <Form.Item label="渠道种类" name="channelType" style={{ width: '100%' }}>
+                  <Select
+                    placeholder="全部种类"
+                    allowClear
+                    value={channelTypeFilter}
+                    onChange={setChannelTypeFilter}
+                  >
+                    {Object.entries(CHANNEL_TYPE_MAP).map(([value, label]) => (
+                      <Select.Option key={value} value={value}>{label}</Select.Option>
                     ))}
                   </Select>
                 </Form.Item>

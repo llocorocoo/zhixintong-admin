@@ -48,8 +48,6 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings/admin-account': { title: '系统账号管理', parent: '/settings' },
   '/settings/menu': { title: '菜单管理', parent: '/settings' },
   '/settings/dict': { title: '字典管理', parent: '/settings' },
-  '/settings/report-template': { title: '报告模板', parent: '/settings' },
-  '/settings/report-content': { title: '报告内容设置', parent: '/settings' },
   '/settings/notification': { title: '通知配置', parent: '/settings' },
   '/channel-settings': { title: '账号管理' },
   '/channel-settings/role': { title: '角色管理', parent: '/channel-settings' },
@@ -155,7 +153,6 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/settings/admin-account')) return '/settings/admin-account';
   if (pathname.startsWith('/settings/menu')) return '/settings/menu';
   if (pathname.startsWith('/settings/dict')) return '/settings/dict';
-  if (pathname.startsWith('/settings/report-')) return pathname;
   if (pathname.startsWith('/settings/notification')) return pathname;
   if (pathname === '/settings') return '/settings/permission-group';
   if (pathname.startsWith('/channel-settings/')) return pathname;
@@ -175,7 +172,6 @@ function getOpenKeys(pathname: string): string[] {
   if (pathname.startsWith('/settings')) {
     keys.push('/settings');
     if (pathname.includes('permission')) keys.push('/settings/permission');
-    if (pathname.includes('report')) keys.push('/settings/report');
   }
   return keys;
 }

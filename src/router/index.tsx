@@ -12,8 +12,6 @@ import TransactionList from '@/pages/Transaction';
 import SettingsLayout from '@/pages/Settings';
 import PermissionGroup from '@/pages/Settings/PermissionGroup';
 import PermissionItem from '@/pages/Settings/PermissionItem';
-import ReportTemplate from '@/pages/Settings/ReportTemplate';
-import ReportContent from '@/pages/Settings/ReportContent';
 import NotificationConfig from '@/pages/Settings/NotificationConfig';
 import RoleManagement from '@/pages/Settings/RoleManagement';
 import MenuManagement from '@/pages/Settings/MenuManagement';
@@ -52,8 +50,6 @@ const router = createBrowserRouter([
           { path: 'menu', element: <MenuManagement /> },
           { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
           { path: 'dict', element: <DictManagement /> },
-          { path: 'report-template', element: <ReportTemplate /> },
-          { path: 'report-content', element: <ReportContent /> },
           { path: 'notification', element: <NotificationConfig /> },
         ],
       },

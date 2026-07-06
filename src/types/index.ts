@@ -177,7 +177,7 @@ export interface Channel {
 }
 
 export type OrderStatus = 'pending' | 'completed' | 'cancelled';
-export type ReportType = 'basic' | 'standard' | 'premium';
+export type ReportType = 'occupational' | 'improvement';
 
 export interface Order {
   id: string;
@@ -192,12 +192,15 @@ export interface Order {
   createdAt: string;
 }
 
+export type PayMethod = 'alipay' | 'wechat';
+
 export interface Transaction {
   id: string;
   transactionNo: string;
   orderNo: string;
   type: 'income' | 'refund';
   amount: number;
+  payMethod: PayMethod;
   channelId: string;
   channelName: string;
   createdAt: string;

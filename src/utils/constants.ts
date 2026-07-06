@@ -1,7 +1,11 @@
 export const REPORT_TYPE_MAP: Record<string, string> = {
-  basic: '基础报告',
-  standard: '标准报告',
-  premium: '高级报告',
+  occupational: '职业信用报告',
+  improvement: '提升信用报告',
+};
+
+export const PAY_METHOD_MAP: Record<string, { text: string; color: string }> = {
+  alipay: { text: '支付宝', color: 'blue' },
+  wechat: { text: '微信', color: 'green' },
 };
 
 export const ORDER_STATUS_MAP: Record<string, { text: string; color: string }> = {

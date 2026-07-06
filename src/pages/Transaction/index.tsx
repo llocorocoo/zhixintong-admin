@@ -3,7 +3,7 @@ import { Table, Tag, Input, Select, DatePicker, Form, Button, Row, Col } from 'a
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockTransactions, mockChannels } from '@/mock/data';
-import { TRANSACTION_TYPE_MAP } from '@/utils/constants';
+import { TRANSACTION_TYPE_MAP, PAY_METHOD_MAP } from '@/utils/constants';
 import type { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
@@ -54,6 +54,13 @@ export default function TransactionList() {
           {amount >= 0 ? '+' : ''}{amount.toFixed(2)} 元
         </span>
       ),
+    },
+    {
+      title: '支付方式', dataIndex: 'payMethod', key: 'payMethod',
+      render: (method: string) => {
+        const m = PAY_METHOD_MAP[method];
+        return m ? <Tag color={m.color}>{m.text}</Tag> : '-';
+      },
     },
     ...(isAdmin ? [{ title: '渠道', dataIndex: 'channelName', key: 'channelName' }] : []),
     { title: '交易时间', dataIndex: 'createdAt', key: 'createdAt' },
