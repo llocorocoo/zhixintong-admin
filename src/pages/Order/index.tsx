@@ -3,7 +3,7 @@ import { Table, Tag, Input, Select, Modal, Descriptions, DatePicker, Form, Butto
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockOrders, mockChannels } from '@/mock/data';
-import { ORDER_STATUS_MAP, REPORT_TYPE_MAP } from '@/utils/constants';
+import { ORDER_STATUS_MAP, REPORT_TYPE_MAP, CHANNEL_TYPE_MAP } from '@/utils/constants';
 import type { Order } from '@/types';
 import type { Dayjs } from 'dayjs';
 
@@ -19,6 +19,8 @@ export default function OrderList() {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [searchForm] = Form.useForm();
+
+  const channelTypeMap = new Map(mockChannels.map((c) => [c.id, c.type]));
 
   const filtered = allOrders.filter((o) => {
     if (search && !o.orderNo.includes(search) && !o.userName.includes(search)) return false;
@@ -57,6 +59,13 @@ export default function OrderList() {
       },
     },
     ...(isAdmin ? [{ title: '渠道', dataIndex: 'channelName', key: 'channelName' }] : []),
+    {
+      title: '渠道种类', dataIndex: 'channelId', key: 'channelType',
+      render: (channelId: string) => {
+        const type = channelTypeMap.get(channelId);
+        return type ? CHANNEL_TYPE_MAP[type] : '-';
+      },
+    },
     { title: '下单时间', dataIndex: 'createdAt', key: 'createdAt' },
     {
       title: '操作', key: 'action',
