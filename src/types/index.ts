@@ -13,6 +13,24 @@ export interface SysRole {
   createdAt: string;
 }
 
+// 菜单节点类型：M=目录 C=菜单页 F=按钮
+export type MenuType = 'M' | 'C' | 'F';
+
+export interface SysMenu {
+  id: string;
+  parentId: string | null;
+  name: string;
+  menuType: MenuType;
+  path?: string;            // 路由（目录/菜单页）
+  icon?: string;            // 图标名（见 utils/menuIcons）
+  perms?: Permission;       // 权限标识（菜单页/按钮），侧边栏据此鉴权
+  orderNum: number;         // 同级排序，越小越靠前
+  visible: boolean;         // 显隐开关
+  status: 'active' | 'inactive';
+  system?: boolean;         // 系统预置核心节点，不可删除
+  superAdminOnly?: boolean; // 仅超级管理员可见
+}
+
 export type Permission =
   | 'channel:view'
   | 'channel:add'

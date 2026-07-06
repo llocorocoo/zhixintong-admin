@@ -16,18 +16,15 @@ import {
   IdcardOutlined,
   SunOutlined,
   MoonOutlined,
-  SafetyCertificateOutlined,
-  FileTextOutlined,
   CrownOutlined,
-  BookOutlined,
-  BellOutlined,
-  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 import { useTheme } from '@/store/useTheme';
+import { useMenus } from '@/store/useMenus';
 import { usePermission } from '@/hooks/usePermission';
-import type { Permission } from '@/types';
+import { renderMenuIcon } from '@/utils/menuIcons';
+import type { Permission, SysMenu } from '@/types';
 
 const { Header, Sider, Content } = Layout;
 
@@ -75,80 +72,43 @@ function getBreadcrumb(pathname: string): string[] {
   return [''];
 }
 
-function buildAdminMenuItems(hasPermission: (p: Permission) => boolean, isSuperAdmin: boolean): MenuProps['items'] {
-  const items: MenuProps['items'] = [
-    { key: '/', icon: <DashboardOutlined />, label: '仪表盘' },
-  ];
-
-  // 渠道管理（合并渠道商列表 + 渠道账号）
-  const channelChildren: MenuProps['items'] = [];
-  if (hasPermission('channel:view')) {
-    channelChildren.push({ key: '/channel', label: '渠道商列表' });
-  }
-  if (hasPermission('channel_account:view')) {
-    channelChildren.push({ key: '/account', label: '渠道账号' });
-  }
-  if (channelChildren.length > 0) {
-    items.push({
-      key: '/channel-mgmt',
-      icon: <TeamOutlined />,
-      label: '渠道管理',
-      children: channelChildren,
-    });
+// admin 端菜单由「菜单管理」的数据驱动（useMenus store）。
+// 过滤：停用/隐藏、仅超管、权限不足、按钮(F) 不进侧边栏；空目录自动隐藏。
+function buildAdminMenuItems(
+  menus: SysMenu[],
+  hasPermission: (p: Permission) => boolean,
+  isSuperAdmin: boolean,
+): MenuProps['items'] {
+  const sorted = [...menus].sort((a, b) => a.orderNum - b.orderNum);
+  const byParent = new Map<string | null, SysMenu[]>();
+  for (const m of sorted) {
+    const arr = byParent.get(m.parentId) ?? [];
+    arr.push(m);
+    byParent.set(m.parentId, arr);
   }
 
-  if (hasPermission('order:view')) {
-    items.push({ key: '/order', icon: <ShoppingCartOutlined />, label: '订单管理' });
-  }
-  if (hasPermission('transaction:view')) {
-    items.push({ key: '/transaction', icon: <TransactionOutlined />, label: '交易明细' });
-  }
-  if (hasPermission('settings:view')) {
-    const settingsChildren: MenuProps['items'] = [
-      {
-        key: '/settings/permission',
-        icon: <SafetyCertificateOutlined />,
-        label: '权限配置',
-        children: [
-          { key: '/settings/permission-group', label: '权限分组管理' },
-          { key: '/settings/permission-item', label: '权限项管理' },
-        ],
-      },
-      { key: '/settings/role', icon: <CrownOutlined />, label: '角色管理' },
-      { key: '/settings/menu', icon: <AppstoreOutlined />, label: '菜单管理' },
-    ];
-    if (isSuperAdmin) {
-      settingsChildren.push({ key: '/settings/admin-account', icon: <UserOutlined />, label: '系统账号管理' });
+  const build = (parentId: string | null): NonNullable<MenuProps['items']> => {
+    const result: NonNullable<MenuProps['items']> = [];
+    for (const m of byParent.get(parentId) ?? []) {
+      if (m.menuType === 'F') continue;
+      if (m.status !== 'active' || !m.visible) continue;
+      if (m.superAdminOnly && !isSuperAdmin) continue;
+      if (m.perms && !hasPermission(m.perms)) continue;
+
+      const children = build(m.id);
+      if (m.menuType === 'M') {
+        if (children.length === 0) continue; // 空目录不显示
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name, children });
+      } else if (children.length > 0) {
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name, children });
+      } else {
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name });
+      }
     }
-    settingsChildren.push(
-      { key: '/settings/dict', icon: <BookOutlined />, label: '字典管理' },
-      {
-        key: '/settings/report',
-        icon: <FileTextOutlined />,
-        label: '报告配置',
-        children: [
-          { key: '/settings/report-template', label: '报告模板' },
-          { key: '/settings/report-content', label: '报告内容设置' },
-        ],
-      },
-      { key: '/settings/notification', icon: <BellOutlined />, label: '通知配置' },
-    );
-    items.push({
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: '系统配置',
-      children: settingsChildren,
-    });
-  }
+    return result;
+  };
 
-  items.push({
-    key: '/user-center', icon: <IdcardOutlined />, label: '个人设置',
-    children: [
-      { key: '/user-center/profile', label: '基本信息' },
-    ],
-  });
-
-  return items;
+  return build(null);
 }
 
 function buildChannelMenuItems(hasPermission: (p: Permission) => boolean): MenuProps['items'] {
@@ -227,9 +187,10 @@ export default function AppLayout() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { mode, toggle } = useTheme();
+  const { menus } = useMenus();
   const { hasPermission, isSuperAdmin } = usePermission();
 
-  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(hasPermission, isSuperAdmin) : buildChannelMenuItems(hasPermission);
+  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(menus, hasPermission, isSuperAdmin) : buildChannelMenuItems(hasPermission);
 
   useEffect(() => {
     setOpenKeys((prev) => {
