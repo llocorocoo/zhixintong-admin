@@ -26,6 +26,10 @@ const DEFAULT_MENUS: SysMenu[] = [
   { id: 'm_role', parentId: 'm_settings', name: '角色管理', menuType: 'C', path: '/settings/role', icon: 'Crown', orderNum: 2, visible: true, status: 'active', system: true },
   { id: 'm_menu', parentId: 'm_settings', name: '菜单管理', menuType: 'C', path: '/settings/menu', icon: 'Appstore', orderNum: 3, visible: true, status: 'active', system: true },
   { id: 'm_admin_account', parentId: 'm_settings', name: '系统账号管理', menuType: 'C', path: '/settings/admin-account', icon: 'User', orderNum: 4, visible: true, status: 'active', system: true, superAdminOnly: true },
+  { id: 'm_admin_account_add', parentId: 'm_admin_account', name: '新增', menuType: 'F', perms: 'admin_account:add', orderNum: 1, visible: true, status: 'active', system: true },
+  { id: 'm_admin_account_edit', parentId: 'm_admin_account', name: '编辑', menuType: 'F', perms: 'admin_account:edit', orderNum: 2, visible: true, status: 'active', system: true },
+  { id: 'm_admin_account_toggle', parentId: 'm_admin_account', name: '启用/停用', menuType: 'F', perms: 'admin_account:toggle', orderNum: 3, visible: true, status: 'active', system: true },
+  { id: 'm_admin_account_reset', parentId: 'm_admin_account', name: '重置密码', menuType: 'F', perms: 'admin_account:reset_pwd', orderNum: 4, visible: true, status: 'active', system: true },
   { id: 'm_dict', parentId: 'm_settings', name: '字典管理', menuType: 'C', path: '/settings/dict', icon: 'Book', orderNum: 5, visible: true, status: 'active', system: true },
   { id: 'm_report', parentId: 'm_settings', name: '报告配置', menuType: 'M', path: '/settings/report', icon: 'FileText', orderNum: 6, visible: true, status: 'active', system: true },
   { id: 'm_report_template', parentId: 'm_report', name: '报告模板', menuType: 'C', path: '/settings/report-template', orderNum: 1, visible: true, status: 'active', system: true },
@@ -36,7 +40,7 @@ const DEFAULT_MENUS: SysMenu[] = [
   { id: 'm_profile', parentId: 'm_user_center', name: '基本信息', menuType: 'C', path: '/user-center/profile', orderNum: 1, visible: true, status: 'active', system: true },
 ];
 
-const STORAGE_KEY = 'zxt_admin_menus';
+const STORAGE_KEY = 'zxt_admin_menus_v2';
 
 function loadMenus(): SysMenu[] {
   const saved = localStorage.getItem(STORAGE_KEY);

@@ -45,6 +45,10 @@ export type Permission =
   | 'order:view'
   | 'transaction:view'
   | 'settings:view'
+  | 'admin_account:add'
+  | 'admin_account:edit'
+  | 'admin_account:toggle'
+  | 'admin_account:reset_pwd'
   | 'my_channel:view';
 
 export const ALL_PERMISSIONS: Permission[] = [
@@ -61,6 +65,10 @@ export const ALL_PERMISSIONS: Permission[] = [
   'order:view',
   'transaction:view',
   'settings:view',
+  'admin_account:add',
+  'admin_account:edit',
+  'admin_account:toggle',
+  'admin_account:reset_pwd',
 ];
 
 export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label: string; desc: string }[] }[] = [
@@ -100,6 +108,15 @@ export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label
     group: '系统配置',
     items: [
       { key: 'settings:view', label: '系统配置', desc: '查看和修改配置' },
+    ],
+  },
+  {
+    group: '系统账号管理',
+    items: [
+      { key: 'admin_account:add', label: '新增系统账号', desc: '创建系统管理账号' },
+      { key: 'admin_account:edit', label: '编辑系统账号', desc: '编辑账号基础信息与角色' },
+      { key: 'admin_account:toggle', label: '启用/停用账号', desc: '切换账号状态' },
+      { key: 'admin_account:reset_pwd', label: '重置密码', desc: '重置账号登录密码' },
     ],
   },
 ];

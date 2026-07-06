@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { PERMISSION_GROUPS, ALL_PERMISSIONS } from '@/types';
-import type { Permission } from '@/types';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm } from 'antd';
+import { PlusOutlined, ReloadOutlined, CheckOutlined } from '@ant-design/icons';
+import { PERMISSION_GROUPS } from '@/types';
 import { useRoles } from '@/store/useRoles';
 
 interface AdminAccount {
@@ -11,32 +10,73 @@ interface AdminAccount {
   name: string;
   roleId?: string;
   isSuperAdmin: boolean;
-  permissions: Permission[];
   status: 'active' | 'inactive';
   createdAt: string;
 }
 
+// 账号不再单独存权限：权限完全由所绑定的角色决定。
 const initialAccounts: AdminAccount[] = [
-  { id: 'adm1', username: 'admin', name: '系统管理员', roleId: 'role1', isSuperAdmin: true, permissions: [...ALL_PERMISSIONS], status: 'active', createdAt: '2024-01-01' },
+  { id: 'adm1', username: 'admin', name: '系统管理员', roleId: 'role1', isSuperAdmin: true, status: 'active', createdAt: '2024-01-01' },
+  { id: 'adm2', username: 'admin02', name: '运营专员', roleId: 'role2', isSuperAdmin: false, status: 'active', createdAt: '2024-02-01' },
 ];
 
 export default function AdminAccountList() {
   const [accounts, setAccounts] = useState<AdminAccount[]>(initialAccounts);
   const [modalOpen, setModalOpen] = useState(false);
-  const [permModalOpen, setPermModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AdminAccount | null>(null);
-  const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
-  const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
 
   const { roles } = useRoles();
   const adminRoles = roles.filter((r) => r.dataScope === 'all' && r.status === 'active');
 
-  const handleRoleChange = (roleId: string) => {
-    const role = roles.find((r) => r.id === roleId);
-    if (role) {
-      setCreatePerms([...role.defaultPermissions]);
-    }
+  // 弹窗内实时预览所选角色绑定的权限（只读）
+  const selectedRoleId = Form.useWatch('roleId', form);
+  const selectedRole = roles.find((r) => r.id === selectedRoleId);
+  const grantedPerms = new Set(selectedRole?.defaultPermissions ?? []);
+
+  const openAdd = () => {
+    setEditingAccount(null);
+    form.resetFields();
+    setModalOpen(true);
+  };
+
+  const openEdit = (account: AdminAccount) => {
+    setEditingAccount(account);
+    form.setFieldsValue({ username: account.username, name: account.name, roleId: account.roleId });
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingAccount(null);
+    form.resetFields();
+  };
+
+  const handleSave = () => {
+    form.validateFields().then((values) => {
+      if (editingAccount) {
+        // 超管仅可编辑基础信息与角色（权限随角色变化）
+        setAccounts((prev) =>
+          prev.map((a) =>
+            a.id === editingAccount.id ? { ...a, name: values.name, roleId: values.roleId } : a
+          )
+        );
+        message.success('账号信息已更新');
+      } else {
+        const newAccount: AdminAccount = {
+          id: 'adm' + Date.now(),
+          username: values.username,
+          name: values.name,
+          roleId: values.roleId,
+          isSuperAdmin: false,
+          status: 'active',
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        setAccounts((prev) => [...prev, newAccount]);
+        message.success('系统账号创建成功');
+      }
+      closeModal();
+    });
   };
 
   const toggleStatus = (id: string) => {
@@ -50,43 +90,6 @@ export default function AdminAccountList() {
 
   const resetPassword = (account: AdminAccount) => {
     message.success(`已重置 ${account.username} 的密码为默认密码`);
-  };
-
-  const handleAdd = () => {
-    form.validateFields().then((values) => {
-      const newAccount: AdminAccount = {
-        id: 'adm' + Date.now(),
-        username: values.username,
-        name: values.name,
-        roleId: values.roleId,
-        isSuperAdmin: false,
-        permissions: [...createPerms],
-        status: 'active',
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-      setAccounts((prev) => [...prev, newAccount]);
-      setModalOpen(false);
-      form.resetFields();
-      setCreatePerms([]);
-      message.success('系统账号创建成功');
-    });
-  };
-
-  const openPermissions = (account: AdminAccount) => {
-    setEditingAccount(account);
-    setSelectedPerms([...account.permissions]);
-    setPermModalOpen(true);
-  };
-
-  const savePermissions = () => {
-    if (!editingAccount) return;
-    setAccounts((prev) =>
-      prev.map((a) =>
-        a.id === editingAccount.id ? { ...a, permissions: selectedPerms } : a
-      )
-    );
-    setPermModalOpen(false);
-    message.success('权限已保存');
   };
 
   const columns = [
@@ -114,7 +117,7 @@ export default function AdminAccountList() {
         <Space>
           {!record.isSuperAdmin && (
             <>
-              <a onClick={() => openPermissions(record)}>权限</a>
+              <a onClick={() => openEdit(record)}>编辑</a>
               <Popconfirm
                 title={`确定${record.status === 'active' ? '停用' : '启用'}该账号？`}
                 onConfirm={() => toggleStatus(record.id)}
@@ -137,117 +140,77 @@ export default function AdminAccountList() {
   return (
     <>
       <div className="table-toolbar">
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 
       <Table columns={columns} dataSource={accounts} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
 
-      {/* 新增账号弹窗 */}
+      {/* 新增 / 编辑账号弹窗（不再直接配置权限，权限随角色而定） */}
       <Modal
-        title="新增系统账号"
+        title={editingAccount ? '编辑系统账号' : '新增系统账号'}
         open={modalOpen}
-        onOk={handleAdd}
-        onCancel={() => { setModalOpen(false); setCreatePerms([]); }}
-        okText="创建"
+        onOk={handleSave}
+        onCancel={closeModal}
+        okText={editingAccount ? '保存' : '创建'}
         cancelText="取消"
-        width={600}
+        width={520}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入' }]}>
-            <Input placeholder="请输入登录用户名" />
+            <Input placeholder="请输入登录用户名" disabled={!!editingAccount} />
           </Form.Item>
           <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入' }]}>
             <Input placeholder="请输入姓名" />
           </Form.Item>
-          <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
-            <Input.Password placeholder="请输入登录密码" />
-          </Form.Item>
+          {!editingAccount && (
+            <Form.Item name="password" label="登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少6位' }]}>
+              <Input.Password placeholder="请输入登录密码" />
+            </Form.Item>
+          )}
           <Form.Item name="roleId" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
-            <Select placeholder="请选择角色" onChange={handleRoleChange}>
+            <Select placeholder="请选择角色">
               {adminRoles.map((r) => (
                 <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
-        </Form>
-        <div style={{ marginTop: 8 }}>
-          <div style={{ margin: '8px 0', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>权限配置</div>
-          <div style={{ marginBottom: 12 }}>
-            <Checkbox
-              checked={createPerms.length === ALL_PERMISSIONS.length}
-              indeterminate={createPerms.length > 0 && createPerms.length < ALL_PERMISSIONS.length}
-              onChange={(e) => setCreatePerms(e.target.checked ? [...ALL_PERMISSIONS] : [])}
-            >
-              全选
-            </Checkbox>
-          </div>
-          {PERMISSION_GROUPS.map((group) => (
-            <div key={group.group} style={{ marginBottom: 16 }}>
-              <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
-              {group.items.map((item) => (
-                <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Checkbox
-                    checked={createPerms.includes(item.key)}
-                    onChange={(e) => {
-                      setCreatePerms(e.target.checked
-                        ? [...createPerms, item.key]
-                        : createPerms.filter((p) => p !== item.key)
-                      );
-                    }}
-                  >
-                    {item.label}
-                  </Checkbox>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </Modal>
 
-      {/* 权限配置弹窗 */}
-      <Modal
-        title={`权限配置 — ${editingAccount?.name || ''}`}
-        open={permModalOpen}
-        onOk={savePermissions}
-        onCancel={() => setPermModalOpen(false)}
-        okText="保存"
-        cancelText="取消"
-        width={520}
-      >
-        <div style={{ marginTop: 8 }}>
-          <div style={{ marginBottom: 12 }}>
-            <Checkbox
-              checked={selectedPerms.length === ALL_PERMISSIONS.length}
-              indeterminate={selectedPerms.length > 0 && selectedPerms.length < ALL_PERMISSIONS.length}
-              onChange={(e) => setSelectedPerms(e.target.checked ? [...ALL_PERMISSIONS] : [])}
-            >
-              全选
-            </Checkbox>
-          </div>
-          {PERMISSION_GROUPS.map((group) => (
-            <div key={group.group} style={{ marginBottom: 16 }}>
-              <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
-              {group.items.map((item) => (
-                <div key={item.key} style={{ padding: '6px 0 6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Checkbox
-                    checked={selectedPerms.includes(item.key)}
-                    onChange={(e) => {
-                      setSelectedPerms(e.target.checked
-                        ? [...selectedPerms, item.key]
-                        : selectedPerms.filter((p) => p !== item.key)
-                      );
-                    }}
-                  >
-                    {item.label}
-                  </Checkbox>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
-                </div>
-              ))}
+          {/* 只读展示所选角色绑定的权限（不可在此编辑，权限由角色决定） */}
+          <div style={{ marginTop: 4 }}>
+            <div style={{ margin: '8px 0', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+              该角色包含的权限
             </div>
-          ))}
-        </div>
+            {!selectedRole ? (
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>请先选择角色</div>
+            ) : grantedPerms.size === 0 ? (
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>该角色暂未配置任何权限</div>
+            ) : (
+              PERMISSION_GROUPS.map((group) => {
+                const items = group.items.filter((item) => grantedPerms.has(item.key));
+                if (items.length === 0) return null;
+                return (
+                  <div key={group.group} style={{ marginBottom: 12 }}>
+                    <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
+                    {items.map((item) => (
+                      <div key={item.key} style={{ padding: '4px 0 4px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--text-primary)' }}>
+                          <CheckOutlined style={{ color: '#27ae60', marginRight: 8 }} />
+                          {item.label}
+                        </span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 8 }}>
+            账号权限由所绑定的角色决定。如需调整权限，请前往「角色管理」修改对应角色，或改绑其它角色。
+          </div>
+        </Form>
       </Modal>
     </>
   );
