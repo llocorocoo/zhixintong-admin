@@ -168,14 +168,14 @@ export default function MenuManagement() {
       width: 260,
       render: (_: unknown, record: MenuNode) => (
         <Space size={4}>
-          {record.menuType !== 'F' && <a onClick={() => openAdd(record.id)}>新增</a>}
-          <a onClick={() => openEdit(record)}>编辑</a>
           <Tooltip title="上移">
             <a onClick={() => moveMenu(record.id, 'up')}><ArrowUpOutlined /></a>
           </Tooltip>
           <Tooltip title="下移">
             <a onClick={() => moveMenu(record.id, 'down')}><ArrowDownOutlined /></a>
           </Tooltip>
+          {record.menuType !== 'F' && <a onClick={() => openAdd(record.id)}>新增</a>}
+          <a onClick={() => openEdit(record)}>编辑</a>
           {record.system ? (
             <Tooltip title="系统预置菜单，不可删除">
               <span style={{ color: '#bbb' }}>删除</span>
