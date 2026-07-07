@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
-  Table, Button, Space, Modal, Form, Input, Select, InputNumber, Switch, Tag, message, Popconfirm, Tooltip,
+  Table, Button, Space, Modal, Form, Input, Select, InputNumber, Switch, Tag, Upload, message, Popconfirm, Tooltip,
 } from 'antd';
-import { PlusOutlined, ReloadOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined, ArrowUpOutlined, ArrowDownOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
+import { exportToJSON, importFromJSON } from '@/utils/exportImport';
 import { useMenus } from '@/store/useMenus';
 import { ALL_PERMISSIONS } from '@/types';
 import type { SysMenu, MenuType, Permission } from '@/types';
@@ -35,12 +36,15 @@ function toTree(menus: SysMenu[]): MenuNode[] {
 }
 
 export default function MenuManagement() {
-  const { menus, addMenu, updateMenu, deleteMenu, toggleVisible, moveMenu, resetMenus } = useMenus();
+  const { menus, addMenu, updateMenu, deleteMenu, toggleVisible, moveMenu, resetMenus, setMenus } = useMenus();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [parentId, setParentId] = useState<string | null>(null);
   const [form] = Form.useForm();
   const menuType = Form.useWatch('menuType', form) as MenuType | undefined;
+
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importPreview, setImportPreview] = useState<SysMenu[] | null>(null);
 
   const treeData = toTree(menus);
   const parentName = parentId ? menus.find((m) => m.id === parentId)?.name ?? '—' : '顶级菜单';
@@ -105,6 +109,29 @@ export default function MenuManagement() {
     });
   };
 
+  const handleExport = () => {
+    exportToJSON(menus, '菜单配置');
+    message.success(`已导出 ${menus.length} 条菜单数据`);
+  };
+
+  const handleImportFile = async (file: File) => {
+    try {
+      const data = await importFromJSON<SysMenu>(file);
+      setImportPreview(data);
+      setImportModalOpen(true);
+    } catch (err) {
+      message.error((err as Error).message);
+    }
+  };
+
+  const confirmImport = () => {
+    if (!importPreview) return;
+    setMenus(importPreview);
+    message.success(`已导入 ${importPreview.length} 条菜单数据（整体替换）`);
+    setImportModalOpen(false);
+    setImportPreview(null);
+  };
+
   const columns = [
     {
       title: '菜单名称',
@@ -165,10 +192,18 @@ export default function MenuManagement() {
 
   return (
     <>
-      <div className="table-toolbar" style={{ display: 'flex', gap: 8 }}>
+      <div className="table-toolbar" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd(null)}>
           新增顶级菜单
         </Button>
+        <Button icon={<ExportOutlined />} onClick={handleExport}>导出</Button>
+        <Upload
+          accept=".json"
+          showUploadList={false}
+          beforeUpload={(file) => { handleImportFile(file); return false; }}
+        >
+          <Button icon={<ImportOutlined />}>导入</Button>
+        </Upload>
         <Popconfirm title="恢复为系统默认菜单？将丢弃全部自定义修改。" onConfirm={() => { resetMenus(); message.success('已恢复默认菜单'); }}>
           <Button icon={<ReloadOutlined />}>恢复默认</Button>
         </Popconfirm>
@@ -235,6 +270,33 @@ export default function MenuManagement() {
             <Switch />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 导入预览弹窗 */}
+      <Modal
+        title="导入预览"
+        open={importModalOpen}
+        onOk={confirmImport}
+        onCancel={() => { setImportModalOpen(false); setImportPreview(null); }}
+        okText="确认导入（整体替换）"
+        cancelText="取消"
+        width={600}
+      >
+        <p style={{ color: '#e74c3c', marginBottom: 12 }}>
+          导入将整体替换当前菜单配置，共 {importPreview?.length || 0} 条数据。
+        </p>
+        <Table
+          columns={[
+            { title: '菜单名称', dataIndex: 'name', key: 'name' },
+            { title: '类型', dataIndex: 'menuType', key: 'menuType', render: (t: string) => <Tag>{t}</Tag> },
+            { title: '路由', dataIndex: 'path', key: 'path', render: (p?: string) => p || '—' },
+          ]}
+          dataSource={importPreview || []}
+          rowKey="id"
+          size="small"
+          pagination={false}
+          scroll={{ y: 300 }}
+        />
       </Modal>
     </>
   );

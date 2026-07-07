@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox, Upload } from 'antd';
+import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { useRoles } from '@/store/useRoles';
+import { exportToJSON, importFromJSON } from '@/utils/exportImport';
 import {
   PERMISSION_GROUPS,
   ALL_PERMISSIONS,
@@ -16,6 +17,9 @@ export default function RoleManagement() {
   const [editingRole, setEditingRole] = useState<SysRole | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
   const [currentDataScope, setCurrentDataScope] = useState<DataScope>('all');
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [importPreview, setImportPreview] = useState<SysRole[] | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [form] = Form.useForm();
 
   const permissionGroups = currentDataScope === 'all' ? PERMISSION_GROUPS : CHANNEL_PERMISSION_GROUPS;
@@ -83,6 +87,43 @@ export default function RoleManagement() {
     setSelectedPerms([]);
   };
 
+  const handleExport = () => {
+    const toExport = selectedRowKeys.length > 0
+      ? roles.filter((r) => selectedRowKeys.includes(r.id))
+      : roles;
+    exportToJSON(toExport, '角色配置');
+    message.success(`已导出 ${toExport.length} 条角色数据`);
+  };
+
+  const handleImportFile = async (file: File) => {
+    try {
+      const data = await importFromJSON<SysRole>(file);
+      setImportPreview(data);
+      setImportModalOpen(true);
+    } catch (err) {
+      message.error((err as Error).message);
+    }
+  };
+
+  const confirmImport = () => {
+    if (!importPreview) return;
+    let added = 0;
+    let updated = 0;
+    for (const item of importPreview) {
+      const existing = roles.find((r) => r.roleKey === item.roleKey);
+      if (existing) {
+        updateRole(existing.id, { ...item, id: existing.id });
+        updated++;
+      } else {
+        addRole({ ...item, id: 'role' + Date.now() + Math.random().toString(36).slice(2, 6) });
+        added++;
+      }
+    }
+    message.success(`导入完成：新增 ${added} 条，更新 ${updated} 条`);
+    setImportModalOpen(false);
+    setImportPreview(null);
+  };
+
   const columns = [
     { title: '角色名称', dataIndex: 'name', key: 'name' },
     { title: '权限字符', dataIndex: 'roleKey', key: 'roleKey' },
@@ -115,18 +156,36 @@ export default function RoleManagement() {
 
   return (
     <>
-      <div className="table-toolbar">
+      <div className="table-toolbar" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增角色</Button>
+        <Button icon={<ExportOutlined />} onClick={handleExport}>
+          导出{selectedRowKeys.length > 0 ? ` (${selectedRowKeys.length})` : ''}
+        </Button>
+        <Upload
+          accept=".json"
+          showUploadList={false}
+          beforeUpload={(file) => { handleImportFile(file); return false; }}
+        >
+          <Button icon={<ImportOutlined />}>导入</Button>
+        </Upload>
         <Button icon={<ReloadOutlined />}>刷新</Button>
+        {selectedRowKeys.length > 0 && (
+          <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>已选 {selectedRowKeys.length} 项</span>
+        )}
       </div>
 
       <Table
         columns={columns}
         dataSource={roles}
         rowKey="id"
+        rowSelection={{
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
+        }}
         pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }}
       />
 
+      {/* 新增/编辑角色弹窗 */}
       <Modal
         title={editingRole ? '编辑角色' : '新增角色'}
         open={modalOpen}
@@ -193,6 +252,42 @@ export default function RoleManagement() {
             </div>
           ))}
         </div>
+      </Modal>
+
+      {/* 导入预览弹窗 */}
+      <Modal
+        title="导入预览"
+        open={importModalOpen}
+        onOk={confirmImport}
+        onCancel={() => { setImportModalOpen(false); setImportPreview(null); }}
+        okText="确认导入"
+        cancelText="取消"
+        width={700}
+      >
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>
+          共 {importPreview?.length || 0} 条数据，roleKey 相同的将覆盖更新，不同的将新增。
+        </p>
+        <Table
+          columns={[
+            { title: '角色名称', dataIndex: 'name', key: 'name' },
+            { title: '权限字符', dataIndex: 'roleKey', key: 'roleKey' },
+            { title: '数据范围', dataIndex: 'dataScope', key: 'dataScope', render: (s: string) => s === 'all' ? '全部数据' : '本渠道' },
+            { title: '状态', dataIndex: 'status', key: 'status', render: (s: string) => <Tag color={s === 'active' ? 'green' : 'default'}>{s === 'active' ? '启用' : '停用'}</Tag> },
+            {
+              title: '操作类型', key: 'action',
+              render: (_: unknown, record: SysRole) => {
+                const existing = roles.find((r) => r.roleKey === record.roleKey);
+                return existing
+                  ? <Tag color="orange">覆盖</Tag>
+                  : <Tag color="blue">新增</Tag>;
+              },
+            },
+          ]}
+          dataSource={importPreview || []}
+          rowKey="roleKey"
+          size="small"
+          pagination={false}
+        />
       </Modal>
     </>
   );

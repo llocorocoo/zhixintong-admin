@@ -62,6 +62,7 @@ interface MenuState {
   deleteMenu: (id: string) => void;         // 级联删除子节点（system 节点由页面拦截）
   toggleVisible: (id: string) => void;
   moveMenu: (id: string, dir: 'up' | 'down') => void; // 同级上下移
+  setMenus: (menus: SysMenu[]) => void;       // 批量设置（导入用）
   resetMenus: () => void;                    // 恢复默认（演示护栏）
 }
 
@@ -120,6 +121,11 @@ export const useMenus = create<MenuState>((set) => ({
         if (m.id === b.id) return { ...m, orderNum: a.orderNum };
         return m;
       });
+      persist(menus);
+      return { menus };
+    }),
+  setMenus: (menus) =>
+    set(() => {
       persist(menus);
       return { menus };
     }),
