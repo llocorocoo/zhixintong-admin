@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Table, Button, Tag, Space, Input, Modal, Form, Select, message, Popconfirm, Row, Col } from 'antd';
-import { PlusOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
 import { usePermission } from '@/hooks/usePermission';
 import type { Channel, ChannelType } from '@/types';
+import { exportToExcel } from '@/utils/exportExcel';
 
 export default function ChannelList() {
   const navigate = useNavigate();
@@ -166,6 +167,23 @@ export default function ChannelList() {
 
       <div className="table-toolbar">
         {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增</Button>}
+        <Button
+          icon={<DownloadOutlined />}
+          onClick={() => exportToExcel(
+            filtered as unknown as Record<string, unknown>[],
+            [
+              { title: '渠道商名称', dataIndex: 'name' },
+              { title: '联系人', dataIndex: 'contact' },
+              { title: '联系方式', dataIndex: 'phone' },
+              { title: '渠道类型', dataIndex: 'type', render: (v) => CHANNEL_TYPE_MAP[v as string] || String(v) },
+              { title: '状态', dataIndex: 'status', render: (v) => v === 'active' ? '启用' : '停用' },
+              { title: '创建时间', dataIndex: 'createdAt' },
+            ],
+            '渠道商列表',
+          )}
+        >
+          导出 Excel
+        </Button>
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 

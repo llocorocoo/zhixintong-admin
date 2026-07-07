@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Table, Tag, Tabs, Input, Select, Modal, Descriptions, DatePicker, Form, Button, Row, Col } from 'antd';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockOrders, mockChannels } from '@/mock/data';
 import { ORDER_STATUS_MAP, REPORT_TYPE_MAP, CHANNEL_TYPE_MAP } from '@/utils/constants';
 import type { Order } from '@/types';
+import { exportToExcel } from '@/utils/exportExcel';
 import type { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
@@ -176,6 +177,26 @@ export default function OrderList() {
       />
 
       <div className="table-toolbar">
+        <Button
+          icon={<DownloadOutlined />}
+          onClick={() => exportToExcel(
+            filtered as unknown as Record<string, unknown>[],
+            [
+              { title: '订单编号', dataIndex: 'orderNo' },
+              { title: '用户姓名', dataIndex: 'userName' },
+              { title: '手机号', dataIndex: 'userPhone' },
+              { title: '报告类型', dataIndex: 'reportType', render: (v) => REPORT_TYPE_MAP[v as string] || String(v) },
+              { title: '金额', dataIndex: 'amount', render: (v) => `¥${Number(v).toFixed(2)}` },
+              { title: '状态', dataIndex: 'status', render: (v) => ORDER_STATUS_MAP[v as string]?.text || String(v) },
+              ...(isAdmin ? [{ title: '渠道', dataIndex: 'channelName' }] : []),
+              { title: '渠道种类', dataIndex: 'channelId', render: (v) => { const t = channelTypeMap.get(v as string); return t ? CHANNEL_TYPE_MAP[t] : '-'; } },
+              { title: '下单时间', dataIndex: 'createdAt' },
+            ],
+            '订单管理',
+          )}
+        >
+          导出 Excel
+        </Button>
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 

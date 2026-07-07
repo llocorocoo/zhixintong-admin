@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Popconfirm, Checkbox } from 'antd';
-import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
 import { useChannels } from '@/store/useChannels';
 import { usePermission } from '@/hooks/usePermission';
 import { CHANNEL_PERMISSION_GROUPS, ALL_CHANNEL_PERMISSIONS } from '@/types';
 import type { Account, Permission } from '@/types';
 import { useRoles } from '@/store/useRoles';
+import { exportToExcel } from '@/utils/exportExcel';
 
 export default function AccountList() {
   const { channels } = useChannels();
@@ -206,6 +207,22 @@ export default function AccountList() {
 
       <div className="table-toolbar">
         {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>}
+        <Button
+          icon={<DownloadOutlined />}
+          onClick={() => exportToExcel(
+            filteredAccounts as unknown as Record<string, unknown>[],
+            [
+              { title: '用户名', dataIndex: 'username' },
+              { title: '姓名', dataIndex: 'name' },
+              { title: '所属渠道', dataIndex: 'channelName' },
+              { title: '状态', dataIndex: 'status', render: (v) => v === 'active' ? '启用' : '停用' },
+              { title: '创建时间', dataIndex: 'createdAt' },
+            ],
+            '渠道账号',
+          )}
+        >
+          导出 Excel
+        </Button>
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 

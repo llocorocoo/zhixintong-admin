@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Table, Tag, Input, Select, DatePicker, Form, Button, Row, Col } from 'antd';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockTransactions, mockChannels } from '@/mock/data';
 import { TRANSACTION_TYPE_MAP, PAY_METHOD_MAP } from '@/utils/constants';
 import type { Dayjs } from 'dayjs';
+import { exportToExcel } from '@/utils/exportExcel';
 
 const { RangePicker } = DatePicker;
 
@@ -115,6 +116,24 @@ export default function TransactionList() {
       </div>
 
       <div className="table-toolbar">
+        <Button
+          icon={<DownloadOutlined />}
+          onClick={() => exportToExcel(
+            filtered as unknown as Record<string, unknown>[],
+            [
+              { title: '交易流水号', dataIndex: 'transactionNo' },
+              { title: '关联订单', dataIndex: 'orderNo' },
+              { title: '类型', dataIndex: 'type', render: (v) => TRANSACTION_TYPE_MAP[v as string]?.text || String(v) },
+              { title: '金额', dataIndex: 'amount', render: (v) => `${Number(v).toFixed(2)}` },
+              { title: '支付方式', dataIndex: 'payMethod', render: (v) => PAY_METHOD_MAP[v as string]?.text || '-' },
+              ...(isAdmin ? [{ title: '渠道', dataIndex: 'channelName' }] : []),
+              { title: '交易时间', dataIndex: 'createdAt' },
+            ],
+            '交易明细',
+          )}
+        >
+          导出 Excel
+        </Button>
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 
