@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
 import { useChannels } from '@/store/useChannels';
 import { usePermission } from '@/hooks/usePermission';
@@ -22,8 +22,21 @@ export default function AccountList() {
   const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
 
+  const [searchUsername, setSearchUsername] = useState('');
+  const [searchName, setSearchName] = useState('');
+  const [searchChannel, setSearchChannel] = useState<string | undefined>(undefined);
+  const [searchStatus, setSearchStatus] = useState<string | undefined>(undefined);
+
   const { roles } = useRoles();
   const channelRoles = roles.filter((r) => r.dataScope === 'channel' && r.status === 'active');
+
+  const filteredAccounts = accounts.filter((a) => {
+    if (searchUsername && !a.username.includes(searchUsername)) return false;
+    if (searchName && !a.name.includes(searchName)) return false;
+    if (searchChannel && a.channelId !== searchChannel) return false;
+    if (searchStatus && a.status !== searchStatus) return false;
+    return true;
+  });
 
   const handleRoleChange = (roleId: string) => {
     const role = roles.find((r) => r.id === roleId);
@@ -122,14 +135,62 @@ export default function AccountList() {
     },
   ];
 
+  const handleReset = () => {
+    setSearchUsername('');
+    setSearchName('');
+    setSearchChannel(undefined);
+    setSearchStatus(undefined);
+  };
+
   return (
     <>
+      <div className="table-search-bar" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Input
+          placeholder="用户名"
+          prefix={<SearchOutlined />}
+          value={searchUsername}
+          onChange={(e) => setSearchUsername(e.target.value)}
+          style={{ width: 180 }}
+          allowClear
+        />
+        <Input
+          placeholder="姓名"
+          prefix={<SearchOutlined />}
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          style={{ width: 180 }}
+          allowClear
+        />
+        <Select
+          placeholder="所属渠道"
+          value={searchChannel}
+          onChange={setSearchChannel}
+          style={{ width: 200 }}
+          allowClear
+        >
+          {channels.filter((c) => c.status === 'active').map((c) => (
+            <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
+          ))}
+        </Select>
+        <Select
+          placeholder="状态"
+          value={searchStatus}
+          onChange={setSearchStatus}
+          style={{ width: 120 }}
+          allowClear
+        >
+          <Select.Option value="active">启用</Select.Option>
+          <Select.Option value="inactive">停用</Select.Option>
+        </Select>
+        <Button onClick={handleReset}>重置</Button>
+      </div>
+
       <div className="table-toolbar">
         {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>}
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 
-      <Table columns={columns} dataSource={accounts} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
+      <Table columns={columns} dataSource={filteredAccounts} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
 
       <Modal
         title="新增渠道商账号"
