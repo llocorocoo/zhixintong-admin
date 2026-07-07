@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Popconfirm, Checkbox } from 'antd';
 import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
 import { useChannels } from '@/store/useChannels';
@@ -21,6 +21,7 @@ export default function AccountList() {
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
   const [createPerms, setCreatePerms] = useState<Permission[]>([]);
   const [form] = Form.useForm();
+  const [searchForm] = Form.useForm();
 
   const [searchUsername, setSearchUsername] = useState('');
   const [searchName, setSearchName] = useState('');
@@ -136,6 +137,7 @@ export default function AccountList() {
   ];
 
   const handleReset = () => {
+    searchForm.resetFields();
     setSearchUsername('');
     setSearchName('');
     setSearchChannel(undefined);
@@ -144,45 +146,62 @@ export default function AccountList() {
 
   return (
     <>
-      <div className="table-search-bar" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Input
-          placeholder="用户名"
-          prefix={<SearchOutlined />}
-          value={searchUsername}
-          onChange={(e) => setSearchUsername(e.target.value)}
-          style={{ width: 180 }}
-          allowClear
-        />
-        <Input
-          placeholder="姓名"
-          prefix={<SearchOutlined />}
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-          style={{ width: 180 }}
-          allowClear
-        />
-        <Select
-          placeholder="所属渠道"
-          value={searchChannel}
-          onChange={setSearchChannel}
-          style={{ width: 200 }}
-          allowClear
-        >
-          {channels.filter((c) => c.status === 'active').map((c) => (
-            <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
-          ))}
-        </Select>
-        <Select
-          placeholder="状态"
-          value={searchStatus}
-          onChange={setSearchStatus}
-          style={{ width: 120 }}
-          allowClear
-        >
-          <Select.Option value="active">启用</Select.Option>
-          <Select.Option value="inactive">停用</Select.Option>
-        </Select>
-        <Button onClick={handleReset}>重置</Button>
+      <div className="search-bar">
+        <Form form={searchForm} layout="inline">
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={6}>
+              <Form.Item label="用户名" name="username" style={{ width: '100%' }}>
+                <Input
+                  placeholder="请输入用户名"
+                  value={searchUsername}
+                  onChange={(e) => setSearchUsername(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="姓名" name="name" style={{ width: '100%' }}>
+                <Input
+                  placeholder="请输入姓名"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="渠道" name="channel" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部渠道"
+                  allowClear
+                  value={searchChannel}
+                  onChange={setSearchChannel}
+                >
+                  {channels.filter((c) => c.status === 'active').map((c) => (
+                    <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="状态" name="status" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部状态"
+                  allowClear
+                  value={searchStatus}
+                  onChange={setSearchStatus}
+                >
+                  <Select.Option value="active">启用</Select.Option>
+                  <Select.Option value="inactive">停用</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="search-buttons">
+            <Button type="primary" icon={<SearchOutlined />}>搜索</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>重置</Button>
+          </div>
+        </Form>
       </div>
 
       <div className="table-toolbar">
