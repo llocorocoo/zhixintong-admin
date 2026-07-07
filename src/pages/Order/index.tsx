@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Tag, Input, Select, Modal, Descriptions, DatePicker, Form, Button, Row, Col } from 'antd';
+import { Table, Tag, Tabs, Input, Select, Modal, Descriptions, DatePicker, Form, Button, Row, Col } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/store/useAuth';
 import { mockOrders, mockChannels } from '@/mock/data';
@@ -14,6 +14,7 @@ export default function OrderList() {
   const isAdmin = user?.role === 'admin';
   const allOrders = isAdmin ? mockOrders : mockOrders.filter((o) => o.channelId === user?.channelId);
 
+  const [activeTab, setActiveTab] = useState('completed');
   const [search, setSearch] = useState('');
   const [reportTypeFilter, setReportTypeFilter] = useState<string | undefined>(undefined);
   const [channelFilter, setChannelFilter] = useState<string | undefined>(undefined);
@@ -24,7 +25,9 @@ export default function OrderList() {
 
   const channelTypeMap = new Map(mockChannels.map((c) => [c.id, c.type]));
 
-  const filtered = allOrders.filter((o) => {
+  const tabOrders = allOrders.filter((o) => o.status === activeTab);
+
+  const filtered = tabOrders.filter((o) => {
     if (search && !o.orderNo.includes(search) && !o.userName.includes(search) && !o.userPhone.includes(search)) return false;
     if (reportTypeFilter && o.reportType !== reportTypeFilter) return false;
     if (channelFilter && o.channelId !== channelFilter) return false;
@@ -35,6 +38,12 @@ export default function OrderList() {
     }
     return true;
   });
+
+  const tabItems = [
+    { key: 'completed', label: `已完成 (${allOrders.filter((o) => o.status === 'completed').length})` },
+    { key: 'pending', label: `未完成 (${allOrders.filter((o) => o.status === 'pending').length})` },
+    { key: 'cancelled', label: `已取消 (${allOrders.filter((o) => o.status === 'cancelled').length})` },
+  ];
 
   const handleReset = () => {
     searchForm.resetFields();
@@ -158,6 +167,13 @@ export default function OrderList() {
           </div>
         </Form>
       </div>
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={tabItems}
+        style={{ marginBottom: 0 }}
+      />
 
       <div className="table-toolbar">
         <Button icon={<ReloadOutlined />}>刷新</Button>
