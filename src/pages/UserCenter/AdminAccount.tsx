@@ -68,7 +68,7 @@ export default function AdminAccountList() {
           id: 'adm' + Date.now(),
           username: values.username,
           name: values.name,
-          roleId: values.roleId,
+          roleId: undefined,
           isSuperAdmin: false,
           status: 'active',
           createdAt: new Date().toISOString().split('T')[0],
@@ -230,46 +230,50 @@ export default function AdminAccountList() {
               <Input.Password placeholder="请输入登录密码" />
             </Form.Item>
           )}
-          <Form.Item name="roleId" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
-            <Select placeholder="请选择角色">
-              {adminRoles.map((r) => (
-                <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+          {editingAccount && (
+            <>
+              <Form.Item name="roleId" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
+                <Select placeholder="请选择角色">
+                  {adminRoles.map((r) => (
+                    <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-          <div style={{ marginTop: 4 }}>
-            <div style={{ margin: '8px 0', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-              该角色包含的权限
-            </div>
-            {!selectedRole ? (
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>请先选择角色</div>
-            ) : grantedPerms.size === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>该角色暂未配置任何权限</div>
-            ) : (
-              PERMISSION_GROUPS.map((group) => {
-                const items = group.items.filter((item) => grantedPerms.has(item.key));
-                if (items.length === 0) return null;
-                return (
-                  <div key={group.group} style={{ marginBottom: 12 }}>
-                    <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
-                    {items.map((item) => (
-                      <div key={item.key} style={{ padding: '4px 0 4px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ color: 'var(--text-primary)' }}>
-                          <CheckOutlined style={{ color: '#27ae60', marginRight: 8 }} />
-                          {item.label}
-                        </span>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
+              <div style={{ marginTop: 4 }}>
+                <div style={{ margin: '8px 0', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  该角色包含的权限
+                </div>
+                {!selectedRole ? (
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>请先选择角色</div>
+                ) : grantedPerms.size === 0 ? (
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>该角色暂未配置任何权限</div>
+                ) : (
+                  PERMISSION_GROUPS.map((group) => {
+                    const items = group.items.filter((item) => grantedPerms.has(item.key));
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={group.group} style={{ marginBottom: 12 }}>
+                        <div style={{ margin: '8px 0', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{group.group}</div>
+                        {items.map((item) => (
+                          <div key={item.key} style={{ padding: '4px 0 4px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-primary)' }}>
+                              <CheckOutlined style={{ color: '#27ae60', marginRight: 8 }} />
+                              {item.label}
+                            </span>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{item.desc}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                );
-              })
-            )}
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 8 }}>
-            账号权限由所绑定的角色决定。如需调整权限，请前往「角色管理」修改对应角色，或改绑其它角色。
-          </div>
+                    );
+                  })
+                )}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 8 }}>
+                账号权限由所绑定的角色决定。如需调整权限，请前往「角色管理」修改对应角色，或改绑其它角色。
+              </div>
+            </>
+          )}
         </Form>
       </Modal>
 

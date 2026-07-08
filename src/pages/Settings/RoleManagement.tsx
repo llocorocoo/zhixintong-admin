@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, message, Popconfirm, Checkbox, Upload } from 'antd';
-import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Popconfirm, Checkbox, Upload } from 'antd';
+import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined, SearchOutlined } from '@ant-design/icons';
 import { useRoles } from '@/store/useRoles';
 import { exportToJSON, importFromJSON } from '@/utils/exportImport';
 import {
@@ -20,10 +20,28 @@ export default function RoleManagement() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [importPreview, setImportPreview] = useState<SysRole[] | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [searchName, setSearchName] = useState('');
+  const [searchRoleKey, setSearchRoleKey] = useState('');
+  const [searchStatus, setSearchStatus] = useState<string | undefined>(undefined);
   const [form] = Form.useForm();
+  const [searchForm] = Form.useForm();
 
   const permissionGroups = currentDataScope === 'all' ? PERMISSION_GROUPS : CHANNEL_PERMISSION_GROUPS;
   const allPermsForScope = currentDataScope === 'all' ? ALL_PERMISSIONS : ALL_CHANNEL_PERMISSIONS;
+
+  const filteredRoles = roles.filter((r) => {
+    if (searchName && !r.name.includes(searchName)) return false;
+    if (searchRoleKey && !r.roleKey.includes(searchRoleKey)) return false;
+    if (searchStatus && r.status !== searchStatus) return false;
+    return true;
+  });
+
+  const handleSearchReset = () => {
+    searchForm.resetFields();
+    setSearchName('');
+    setSearchRoleKey('');
+    setSearchStatus(undefined);
+  };
 
   const openAdd = () => {
     setEditingRole(null);
@@ -156,6 +174,50 @@ export default function RoleManagement() {
 
   return (
     <>
+      <div className="search-bar">
+        <Form form={searchForm} layout="inline">
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={8}>
+              <Form.Item label="角色名称" name="name" style={{ width: '100%' }}>
+                <Input
+                  placeholder="请输入角色名称"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="权限字符" name="roleKey" style={{ width: '100%' }}>
+                <Input
+                  placeholder="请输入权限字符"
+                  value={searchRoleKey}
+                  onChange={(e) => setSearchRoleKey(e.target.value)}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="状态" name="status" style={{ width: '100%' }}>
+                <Select
+                  placeholder="全部状态"
+                  allowClear
+                  value={searchStatus}
+                  onChange={setSearchStatus}
+                >
+                  <Select.Option value="active">启用</Select.Option>
+                  <Select.Option value="inactive">停用</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="search-buttons">
+            <Button type="primary" icon={<SearchOutlined />}>搜索</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleSearchReset}>重置</Button>
+          </div>
+        </Form>
+      </div>
+
       <div className="table-toolbar" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增角色</Button>
         <Button icon={<ExportOutlined />} onClick={handleExport}>
@@ -176,7 +238,7 @@ export default function RoleManagement() {
 
       <Table
         columns={columns}
-        dataSource={roles}
+        dataSource={filteredRoles}
         rowKey="id"
         rowSelection={{
           selectedRowKeys,
