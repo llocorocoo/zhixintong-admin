@@ -93,6 +93,11 @@ export default function AdminAccountList() {
     message.success(`已重置 ${account.username} 的密码为默认密码`);
   };
 
+  const handleDelete = (id: string) => {
+    setAccounts((prev) => prev.filter((a) => a.id !== id));
+    message.success('账号已删除');
+  };
+
   const handleExport = () => {
     const toExport = selectedRowKeys.length > 0
       ? accounts.filter((a) => selectedRowKeys.includes(a.id))
@@ -168,6 +173,9 @@ export default function AdminAccountList() {
               </Popconfirm>
               <Popconfirm title="确定重置该账号密码？" onConfirm={() => resetPassword(record)}>
                 <a>重置密码</a>
+              </Popconfirm>
+              <Popconfirm title="确定删除该账号？删除后不可恢复。" onConfirm={() => handleDelete(record.id)}>
+                <a style={{ color: '#e74c3c' }}>删除</a>
               </Popconfirm>
             </>
           )}
