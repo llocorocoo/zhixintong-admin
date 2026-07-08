@@ -10,7 +10,7 @@ import { exportToExcel } from '@/utils/exportExcel';
 
 export default function ChannelList() {
   const navigate = useNavigate();
-  const { channels, addChannel, updateChannel, toggleStatus } = useChannels();
+  const { channels, addChannel, updateChannel, toggleStatus, deleteChannel } = useChannels();
   const { hasPermission } = usePermission();
   const canAdd = hasPermission('channel:add');
   const canEdit = hasPermission('channel:edit');
@@ -111,6 +111,9 @@ export default function ChannelList() {
             </a>
           </Popconfirm>
           )}
+          <Popconfirm title="确定删除该渠道商？删除后不可恢复。" onConfirm={() => { deleteChannel(record.id); message.success('渠道商已删除'); }}>
+            <a style={{ color: '#e74c3c' }}>删除</a>
+          </Popconfirm>
         </Space>
       ),
     },

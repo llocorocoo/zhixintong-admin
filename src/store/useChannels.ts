@@ -7,6 +7,7 @@ interface ChannelState {
   addChannel: (channel: Channel) => void;
   updateChannel: (id: string, data: Partial<Channel>) => void;
   toggleStatus: (id: string) => void;
+  deleteChannel: (id: string) => void;
 }
 
 export const useChannels = create<ChannelState>((set) => ({
@@ -22,5 +23,9 @@ export const useChannels = create<ChannelState>((set) => ({
       channels: state.channels.map((c) =>
         c.id === id ? { ...c, status: c.status === 'active' ? 'inactive' : 'active' } : c
       ),
+    })),
+  deleteChannel: (id) =>
+    set((state) => ({
+      channels: state.channels.filter((c) => c.id !== id),
     })),
 }));
