@@ -211,7 +211,6 @@ export interface Account {
   username: string;
   name: string;
   roleId?: string;
-  parentId?: string | null;
   channelId: string;
   channelName: string;
   status: 'active' | 'inactive';
