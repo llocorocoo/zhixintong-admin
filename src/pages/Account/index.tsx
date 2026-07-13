@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Popconfirm } from 'antd';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, DownloadOutlined, CheckOutlined } from '@ant-design/icons';
 import { mockAccounts } from '@/mock/data';
@@ -8,6 +8,26 @@ import { CHANNEL_PERMISSION_GROUPS } from '@/types';
 import type { Account } from '@/types';
 import { useRoles } from '@/store/useRoles';
 import { exportToExcel } from '@/utils/exportExcel';
+
+type AccountNode = Account & { children?: AccountNode[] };
+
+function toTree(list: Account[]): AccountNode[] {
+  const map = new Map<string, AccountNode>();
+  const roots: AccountNode[] = [];
+  for (const item of list) {
+    map.set(item.id, { ...item });
+  }
+  for (const node of map.values()) {
+    if (node.parentId && map.has(node.parentId)) {
+      const parent = map.get(node.parentId)!;
+      if (!parent.children) parent.children = [];
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
 
 export default function AccountList() {
   const { channels } = useChannels();
@@ -19,6 +39,7 @@ export default function AccountList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [parentAccount, setParentAccount] = useState<Account | null>(null);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [searchForm] = Form.useForm();
@@ -39,6 +60,8 @@ export default function AccountList() {
     return true;
   });
 
+  const treeData = useMemo(() => toTree(filteredAccounts), [filteredAccounts]);
+
   const toggleStatus = (id: string) => {
     setAccounts((prev) =>
       prev.map((a) =>
@@ -53,8 +76,24 @@ export default function AccountList() {
   };
 
   const handleDelete = (id: string) => {
-    setAccounts((prev) => prev.filter((a) => a.id !== id));
+    setAccounts((prev) => {
+      const childIds = new Set<string>();
+      childIds.add(id);
+      for (const a of prev) {
+        if (a.parentId === id) childIds.add(a.id);
+      }
+      return prev.filter((a) => !childIds.has(a.id));
+    });
     message.success('账号已删除');
+  };
+
+  const openAdd = (parent?: Account) => {
+    setParentAccount(parent || null);
+    form.resetFields();
+    if (parent) {
+      form.setFieldsValue({ channelId: parent.channelId });
+    }
+    setModalOpen(true);
   };
 
   const handleAdd = () => {
@@ -66,6 +105,7 @@ export default function AccountList() {
         name: values.name,
         channelId: values.channelId,
         channelName: channel?.name || '',
+        parentId: parentAccount?.id || null,
         roleId: undefined,
         permissions: [],
         status: 'active',
@@ -74,6 +114,7 @@ export default function AccountList() {
       setAccounts((prev) => [...prev, newAccount]);
       setModalOpen(false);
       form.resetFields();
+      setParentAccount(null);
       message.success('账号创建成功');
     });
   };
@@ -127,6 +168,7 @@ export default function AccountList() {
       title: '操作', key: 'action',
       render: (_: unknown, record: Account) => (
         <Space>
+          {!record.parentId && <a onClick={() => openAdd(record)}>新增</a>}
           <a onClick={() => openEdit(record)}>编辑</a>
           {canToggle && (
             <Popconfirm
@@ -143,7 +185,7 @@ export default function AccountList() {
               <a>重置密码</a>
             </Popconfirm>
           )}
-          <Popconfirm title="确定删除该账号？删除后不可恢复。" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title={record.parentId ? '确定删除该账号？删除后不可恢复。' : '确定删除该账号及其所有子账号？删除后不可恢复。'} onConfirm={() => handleDelete(record.id)}>
             <a style={{ color: '#e74c3c' }}>删除</a>
           </Popconfirm>
         </Space>
@@ -220,7 +262,7 @@ export default function AccountList() {
       </div>
 
       <div className="table-toolbar">
-        {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true); }}>新增</Button>}
+        {canAdd && <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd()}>新增</Button>}
         <Button
           icon={<DownloadOutlined />}
           onClick={() => exportToExcel(
@@ -241,14 +283,14 @@ export default function AccountList() {
         <Button icon={<ReloadOutlined />}>刷新</Button>
       </div>
 
-      <Table columns={columns} dataSource={filteredAccounts} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
+      <Table columns={columns} dataSource={treeData} rowKey="id" pagination={{ showTotal: (total) => `共 ${total} 条`, showSizeChanger: true, showQuickJumper: true }} />
 
       {/* 新增账号弹窗 */}
       <Modal
-        title="新增渠道商账号"
+        title={parentAccount ? `新增子账号 — 上级：${parentAccount.username}` : '新增渠道商账号'}
         open={modalOpen}
         onOk={handleAdd}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => { setModalOpen(false); setParentAccount(null); }}
         okText="创建"
         cancelText="取消"
         width={500}
@@ -256,7 +298,7 @@ export default function AccountList() {
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="channelId" label="所属渠道商" rules={[{ required: true, message: '请选择' }]}>
-            <Select placeholder="请选择渠道商">
+            <Select placeholder="请选择渠道商" disabled={!!parentAccount}>
               {channels.filter((c) => c.status === 'active').map((c) => (
                 <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>
               ))}
