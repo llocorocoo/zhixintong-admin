@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Input, Modal, Form, Select, message, Popconfirm, Row, Col } from 'antd';
-import { PlusOutlined, SearchOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Table, Button, Tag, Space, Input, Modal, Form, Select, Upload, message, Popconfirm, Row, Col } from 'antd';
+import { PlusOutlined, SearchOutlined, ReloadOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
@@ -22,6 +22,9 @@ export default function ChannelList() {
   const [editingChannel, setEditingChannel] = useState<Channel | null>(null);
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
+  const [logoFile, setLogoFile] = useState<string | undefined>(undefined);
+
+  const watchType = Form.useWatch('type', form);
 
   const filtered = channels.filter((c) => {
     if (search && !c.name.includes(search) && !c.contact.includes(search)) return false;
@@ -38,24 +41,39 @@ export default function ChannelList() {
   const openAdd = () => {
     setEditingChannel(null);
     form.resetFields();
+    setLogoFile(undefined);
     setModalOpen(true);
   };
 
   const openEdit = (channel: Channel) => {
     setEditingChannel(channel);
     form.setFieldsValue(channel);
+    setLogoFile(channel.logo);
     setModalOpen(true);
+  };
+
+  const handleLogoUpload = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setLogoFile(url);
+    return false;
   };
 
   const handleSave = () => {
     form.validateFields().then((values) => {
+      const data = { ...values };
+      if (values.type === 'oem') {
+        data.logo = logoFile;
+      } else {
+        data.domain = undefined;
+        data.logo = undefined;
+      }
       if (editingChannel) {
-        updateChannel(editingChannel.id, values);
+        updateChannel(editingChannel.id, data);
         message.success('编辑成功');
       } else {
         const promoCode = values.name.substring(0, 2).toUpperCase() + Date.now().toString().slice(-4);
         const newChannel: Channel = {
-          ...values,
+          ...data,
           id: 'ch' + Date.now(),
           status: 'active' as const,
           promoCode,
@@ -216,6 +234,28 @@ export default function ChannelList() {
               <Select.Option value="oem">OEM</Select.Option>
             </Select>
           </Form.Item>
+          {watchType === 'oem' && (
+            <>
+              <Form.Item name="domain" label="OEM 域名">
+                <Input placeholder="例: report.huaxin.com" />
+              </Form.Item>
+              <Form.Item label="品牌 Logo">
+                {logoFile && (
+                  <div style={{ marginBottom: 8 }}>
+                    <img src={logoFile} alt="Logo" style={{ maxHeight: 60, border: '1px solid #eee', padding: 4 }} />
+                  </div>
+                )}
+                <Upload
+                  accept="image/*"
+                  maxCount={1}
+                  showUploadList={false}
+                  beforeUpload={(file) => handleLogoUpload(file as File)}
+                >
+                  <Button icon={<UploadOutlined />}>{logoFile ? '更换 Logo' : '上传 Logo'}</Button>
+                </Upload>
+              </Form.Item>
+            </>
+          )}
         </Form>
       </Modal>
     </>

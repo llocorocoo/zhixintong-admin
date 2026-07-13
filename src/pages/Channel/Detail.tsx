@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Descriptions, Tag, Button, Card, QRCode, Input, Form, Upload, message, Space, Alert } from 'antd';
-import { ArrowLeftOutlined, UploadOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Descriptions, Tag, Button, Card, QRCode, Input, message, Space, Alert } from 'antd';
+import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useChannels } from '@/store/useChannels';
 import { CHANNEL_TYPE_MAP } from '@/utils/constants';
 import { usePermission } from '@/hooks/usePermission';
@@ -23,18 +23,6 @@ export default function ChannelDetail() {
       promoLink: `https://zhixintong.com/r/${newCode}`,
     });
     message.success('推广链接已重新生成');
-  };
-
-  const saveDomain = (domain: string) => {
-    updateChannel(channel.id, { domain });
-    message.success('域名配置已保存');
-  };
-
-  const handleLogoUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    updateChannel(channel.id, { logo: url });
-    message.success('Logo 已上传');
-    return false;
   };
 
   return (
@@ -111,53 +99,27 @@ export default function ChannelDetail() {
             style={{ marginBottom: 16 }}
           />
 
-          <Card title="域名绑定" style={{ marginBottom: 16 }}>
-            <Form
-              layout="inline"
-              initialValues={{ domain: channel.domain }}
-              onFinish={(values) => saveDomain(values.domain)}
-            >
-              <Form.Item
-                name="domain"
-                label="渠道商域名"
-                rules={[{ required: true, message: '请输入域名' }]}
-              >
-                <Input placeholder="例: report.huaxin.com" style={{ width: 300 }} />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  保存绑定
-                </Button>
-              </Form.Item>
-            </Form>
-            {channel.domain && (
-              <div style={{ marginTop: 12, color: '#52c41a' }}>
-                当前已绑定域名: <strong>{channel.domain}</strong> → 映射至平台服务
+          <Card title="域名信息" style={{ marginBottom: 16 }}>
+            {channel.domain ? (
+              <div>
+                <strong>已绑定域名：</strong>
+                <span style={{ color: '#52c41a' }}>{channel.domain}</span>
+                <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>→ 映射至平台服务</span>
               </div>
+            ) : (
+              <div style={{ color: 'var(--text-secondary)' }}>暂未绑定域名，请在渠道商列表中编辑添加</div>
             )}
           </Card>
 
-          <Card title="Logo 定制">
-            <p style={{ color: '#666', marginBottom: 16 }}>
-              上传渠道商品牌 Logo，将用于报告页面等场景展示
-            </p>
-            {channel.logo && (
-              <div style={{ marginBottom: 16 }}>
-                <span style={{ marginRight: 12 }}>当前 Logo:</span>
+          <Card title="Logo 信息">
+            {channel.logo ? (
+              <div>
+                <div style={{ marginBottom: 8, color: 'var(--text-secondary)' }}>当前品牌 Logo：</div>
                 <img src={channel.logo} alt="Logo" style={{ maxHeight: 80, border: '1px solid #eee', padding: 4 }} />
               </div>
+            ) : (
+              <div style={{ color: 'var(--text-secondary)' }}>暂未上传 Logo，请在渠道商列表中编辑添加</div>
             )}
-            <Upload
-              listType="picture-card"
-              maxCount={1}
-              showUploadList={false}
-              beforeUpload={(file) => handleLogoUpload(file as File)}
-            >
-              <div>
-                <UploadOutlined />
-                <div style={{ marginTop: 8 }}>{channel.logo ? '更换 Logo' : '上传 Logo'}</div>
-              </div>
-            </Upload>
           </Card>
         </>
       )}
