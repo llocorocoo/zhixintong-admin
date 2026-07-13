@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Popconfirm, Checkbox, Upload } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Checkbox, Upload } from 'antd';
 import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined, SearchOutlined } from '@ant-design/icons';
 import { useRoles } from '@/store/useRoles';
 import { exportToJSON, importFromJSON } from '@/utils/exportImport';
@@ -12,7 +12,7 @@ import {
 import type { SysRole, DataScope, Permission } from '@/types';
 
 export default function RoleManagement() {
-  const { roles, addRole, updateRole, deleteRole } = useRoles();
+  const { roles, addRole, updateRole } = useRoles();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<SysRole | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
@@ -95,11 +95,6 @@ export default function RoleManagement() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    deleteRole(id);
-    message.success('角色已删除');
-  };
-
   const handleDataScopeChange = (scope: DataScope) => {
     setCurrentDataScope(scope);
     setSelectedPerms([]);
@@ -153,22 +148,20 @@ export default function RoleManagement() {
         </Tag>
       ),
     },
-    { title: '备注', dataIndex: 'remark', key: 'remark', render: (text: string) => text || '—' },
+    {
+      title: '备注', dataIndex: 'dataScope', key: 'dataScope',
+      render: (scope: string) => scope === 'all' ? '全部数据' : '本渠道数据',
+    },
     {
       title: '操作', key: 'action',
-      render: (_: unknown, record: SysRole) => {
-        if (record.roleKey === 'super_admin') {
-          return <span style={{ color: 'var(--text-secondary)' }}>—</span>;
-        }
-        return (
-          <Space>
-            <a onClick={() => openEdit(record)}>编辑</a>
-            <Popconfirm title="确定删除该角色？" onConfirm={() => handleDelete(record.id)}>
-              <a style={{ color: '#e74c3c' }}>删除</a>
-            </Popconfirm>
-          </Space>
-        );
-      },
+      render: (_: unknown, record: SysRole) => (
+        <Space>
+          <a onClick={() => openEdit(record)}>编辑</a>
+          <a onClick={() => message.info(`分配用户：${record.name}`)}>分配用户</a>
+          <a onClick={() => openEdit(record)}>分配权限</a>
+          <a onClick={() => message.info(`数据权限：${record.name}`)}>数据权限</a>
+        </Space>
+      ),
     },
   ];
 
