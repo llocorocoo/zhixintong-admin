@@ -62,8 +62,9 @@ export const mockRoles: SysRole[] = [
 ];
 
 export const mockAccounts: Account[] = [
-  { id: 'a1', username: 'channel01', name: '张三', channelId: 'ch1', channelName: '信达渠道', status: 'active', createdAt: '2024-01-15' },
-  { id: 'a2', username: 'channel02', name: '李四', channelId: 'ch2', channelName: '华信科技', status: 'active', createdAt: '2024-02-20' },
-  { id: 'a3', username: 'channel03', name: '王五', channelId: 'ch3', channelName: '诚信数据', status: 'inactive', createdAt: '2024-03-10' },
-  { id: 'a4', username: 'channel04', name: '赵六', channelId: 'ch4', channelName: '鼎信服务', status: 'active', createdAt: '2024-04-05' },
+  { id: 'a1', username: 'channel01', name: '张三', parentId: null, channelId: 'ch1', channelName: '信达渠道', status: 'active', createdAt: '2024-01-15' },
+  { id: 'a1-1', username: 'channel01_sub1', name: '张三子1', parentId: 'a1', channelId: 'ch1', channelName: '信达渠道', status: 'active', createdAt: '2024-05-10' },
+  { id: 'a2', username: 'channel02', name: '李四', parentId: null, channelId: 'ch2', channelName: '华信科技', status: 'active', createdAt: '2024-02-20' },
+  { id: 'a3', username: 'channel03', name: '王五', parentId: null, channelId: 'ch3', channelName: '诚信数据', status: 'inactive', createdAt: '2024-03-10' },
+  { id: 'a4', username: 'channel04', name: '赵六', parentId: null, channelId: 'ch4', channelName: '鼎信服务', status: 'active', createdAt: '2024-04-05' },
 ];
