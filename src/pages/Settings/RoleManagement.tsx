@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Checkbox, Upload } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Checkbox, Upload, Transfer } from 'antd';
 import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined, SearchOutlined } from '@ant-design/icons';
 import { useRoles } from '@/store/useRoles';
 import { exportToJSON, importFromJSON } from '@/utils/exportImport';
+import { mockAccounts } from '@/mock/data';
 import {
   PERMISSION_GROUPS,
   ALL_PERMISSIONS,
@@ -10,6 +11,12 @@ import {
   ALL_CHANNEL_PERMISSIONS,
 } from '@/types';
 import type { SysRole, DataScope, Permission } from '@/types';
+
+const allAccounts = [
+  { key: 'adm1', username: 'admin', name: '系统管理员', roleId: 'role1', type: 'admin' as const },
+  { key: 'adm2', username: 'admin02', name: '运营专员', roleId: 'role2', type: 'admin' as const },
+  ...mockAccounts.map((a) => ({ key: a.id, username: a.username, name: a.name, roleId: a.roleId, type: 'channel' as const })),
+];
 
 export default function RoleManagement() {
   const { roles, addRole, updateRole } = useRoles();
@@ -23,6 +30,9 @@ export default function RoleManagement() {
   const [searchName, setSearchName] = useState('');
   const [searchRoleKey, setSearchRoleKey] = useState('');
   const [searchStatus, setSearchStatus] = useState<string | undefined>(undefined);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assigningRole, setAssigningRole] = useState<SysRole | null>(null);
+  const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
 
@@ -95,6 +105,20 @@ export default function RoleManagement() {
     });
   };
 
+  const openAssign = (role: SysRole) => {
+    setAssigningRole(role);
+    const already = allAccounts.filter((a) => a.roleId === role.id).map((a) => a.key);
+    setAssignedKeys(already);
+    setAssignModalOpen(true);
+  };
+
+  const confirmAssign = () => {
+    if (!assigningRole) return;
+    message.success(`已将角色「${assigningRole.name}」分配给 ${assignedKeys.length} 个账号`);
+    setAssignModalOpen(false);
+    setAssigningRole(null);
+  };
+
   const handleDataScopeChange = (scope: DataScope) => {
     setCurrentDataScope(scope);
     setSelectedPerms([]);
@@ -157,7 +181,7 @@ export default function RoleManagement() {
       render: (_: unknown, record: SysRole) => (
         <Space>
           <a onClick={() => openEdit(record)}>编辑</a>
-          <a onClick={() => message.info(`分配用户：${record.name}`)}>分配用户</a>
+          <a onClick={() => openAssign(record)}>分配账号</a>
           <a onClick={() => openEdit(record)}>分配权限</a>
           <a onClick={() => message.info(`数据权限：${record.name}`)}>数据权限</a>
         </Space>
@@ -342,6 +366,32 @@ export default function RoleManagement() {
           rowKey="roleKey"
           size="small"
           pagination={false}
+        />
+      </Modal>
+
+      {/* 分配账号弹窗 */}
+      <Modal
+        title={`分配账号 — ${assigningRole?.name || ''}`}
+        open={assignModalOpen}
+        onOk={confirmAssign}
+        onCancel={() => { setAssignModalOpen(false); setAssigningRole(null); }}
+        okText="确认分配"
+        cancelText="取消"
+        width={640}
+        destroyOnClose
+      >
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>
+          从左侧选择账号添加到右侧，右侧账号将绑定角色「{assigningRole?.name}」
+        </p>
+        <Transfer
+          dataSource={allAccounts.map((a) => ({ key: a.key, title: `${a.name}（${a.username}）` }))}
+          titles={['未分配', '已分配']}
+          targetKeys={assignedKeys}
+          onChange={(keys) => setAssignedKeys(keys as string[])}
+          render={(item) => item.title || ''}
+          showSearch
+          listStyle={{ width: 260, height: 320 }}
+          locale={{ itemUnit: '个', itemsUnit: '个', searchPlaceholder: '搜索账号' }}
         />
       </Modal>
     </>
