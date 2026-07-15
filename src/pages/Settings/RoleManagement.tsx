@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Table, Button, Tag, Space, Modal, Form, Input, Select, Row, Col, message, Checkbox, Upload, Transfer } from 'antd';
 import { PlusOutlined, ReloadOutlined, ExportOutlined, ImportOutlined, SearchOutlined } from '@ant-design/icons';
 import { useRoles } from '@/store/useRoles';
+import { useAuth } from '@/store/useAuth';
+import { useOperationLog } from '@/store/useOperationLog';
 import { exportToJSON, importFromJSON } from '@/utils/exportImport';
 import { mockAccounts } from '@/mock/data';
 import {
@@ -20,6 +22,8 @@ const allAccounts = [
 
 export default function RoleManagement() {
   const { roles, addRole, updateRole } = useRoles();
+  const { user } = useAuth();
+  const { addLog } = useOperationLog();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<SysRole | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Permission[]>([]);
@@ -87,10 +91,12 @@ export default function RoleManagement() {
           remark: values.remark,
           defaultPermissions: selectedPerms,
         });
+        addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '角色管理', action: 'update', actionLabel: '修改', targetType: 'role', targetId: editingRole.id, targetName: editingRole.name, result: 'success' });
         message.success('角色已更新');
       } else {
+        const newId = 'role' + Date.now();
         addRole({
-          id: 'role' + Date.now(),
+          id: newId,
           name: values.name,
           roleKey: values.roleKey,
           dataScope: values.dataScope,
@@ -99,6 +105,7 @@ export default function RoleManagement() {
           remark: values.remark,
           createdAt: new Date().toISOString().split('T')[0],
         });
+        addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '角色管理', action: 'create', actionLabel: '新增', targetType: 'role', targetId: newId, targetName: values.name, result: 'success' });
         message.success('角色创建成功');
       }
       setModalOpen(false);
@@ -114,6 +121,7 @@ export default function RoleManagement() {
 
   const confirmAssign = () => {
     if (!assigningRole) return;
+    addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '角色管理', action: 'assign', actionLabel: '分配账号', targetType: 'role', targetId: assigningRole.id, targetName: assigningRole.name, remark: `分配给 ${assignedKeys.length} 个账号`, result: 'success' });
     message.success(`已将角色「${assigningRole.name}」分配给 ${assignedKeys.length} 个账号`);
     setAssignModalOpen(false);
     setAssigningRole(null);

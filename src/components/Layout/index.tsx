@@ -154,6 +154,7 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/settings/menu')) return '/settings/menu';
   if (pathname.startsWith('/settings/dict')) return '/settings/dict';
   if (pathname.startsWith('/settings/notification')) return pathname;
+  if (pathname.startsWith('/settings/operation-log')) return '/settings/operation-log';
   if (pathname === '/settings') return '/settings/permission-group';
   if (pathname.startsWith('/channel-settings/')) return pathname;
   if (pathname === '/account') return '/account';
