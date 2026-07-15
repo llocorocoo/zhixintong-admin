@@ -13,6 +13,7 @@ import SettingsLayout from '@/pages/Settings';
 import PermissionGroup from '@/pages/Settings/PermissionGroup';
 import PermissionItem from '@/pages/Settings/PermissionItem';
 import NotificationConfig from '@/pages/Settings/NotificationConfig';
+import OperationLog from '@/pages/Settings/OperationLog';
 import RoleManagement from '@/pages/Settings/RoleManagement';
 import MenuManagement from '@/pages/Settings/MenuManagement';
 import UserCenter from '@/pages/UserCenter';
@@ -51,6 +52,7 @@ const router = createBrowserRouter([
           { path: 'admin-account', element: <AuthGuard roles={['admin']}><AdminAccount /></AuthGuard> },
           { path: 'dict', element: <DictManagement /> },
           { path: 'notification', element: <NotificationConfig /> },
+          { path: 'operation-log', element: <OperationLog /> },
         ],
       },
       { path: 'channel-settings/role', element: <AuthGuard roles={['channel']}><ChannelRoleManagement /></AuthGuard> },

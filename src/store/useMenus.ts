@@ -32,6 +32,7 @@ const DEFAULT_MENUS: SysMenu[] = [
   { id: 'm_admin_account_reset', parentId: 'm_admin_account', name: '重置密码', menuType: 'F', perms: 'admin_account:reset_pwd', orderNum: 4, visible: true, status: 'active', system: true },
   { id: 'm_dict', parentId: 'm_settings', name: '字典管理', menuType: 'C', path: '/settings/dict', icon: 'Book', orderNum: 5, visible: true, status: 'active', system: true },
   { id: 'm_notification', parentId: 'm_settings', name: '通知配置', menuType: 'C', path: '/settings/notification', icon: 'Bell', orderNum: 6, visible: true, status: 'active', system: true },
+  { id: 'm_operation_log', parentId: 'm_settings', name: '操作日志', menuType: 'C', path: '/settings/operation-log', icon: 'FileText', orderNum: 7, visible: true, status: 'active', system: true },
 
   { id: 'm_user_center', parentId: null, name: '个人设置', menuType: 'M', path: '/user-center', icon: 'Idcard', orderNum: 6, visible: true, status: 'active', system: true },
   { id: 'm_profile', parentId: 'm_user_center', name: '基本信息', menuType: 'C', path: '/user-center/profile', orderNum: 1, visible: true, status: 'active', system: true },

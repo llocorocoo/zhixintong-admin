@@ -7,6 +7,8 @@ import { usePermission } from '@/hooks/usePermission';
 import { CHANNEL_PERMISSION_GROUPS } from '@/types';
 import type { Account } from '@/types';
 import { useRoles } from '@/store/useRoles';
+import { useAuth } from '@/store/useAuth';
+import { useOperationLog } from '@/store/useOperationLog';
 import { exportToExcel } from '@/utils/exportExcel';
 
 type AccountNode = Account & { children?: AccountNode[] };
@@ -32,6 +34,8 @@ function toTree(list: Account[]): AccountNode[] {
 export default function AccountList() {
   const { channels } = useChannels();
   const { hasPermission } = usePermission();
+  const { user } = useAuth();
+  const { addLog } = useOperationLog();
   const canAdd = hasPermission('channel_account:add');
   const canToggle = hasPermission('channel_account:toggle');
   const canResetPwd = hasPermission('channel_account:reset_pwd');
@@ -68,14 +72,19 @@ export default function AccountList() {
         a.id === id ? { ...a, status: a.status === 'active' ? 'inactive' : 'active' } : a
       )
     );
+    const account = accounts.find((a) => a.id === id);
+    const newStatus = account?.status === 'active' ? '停用' : '启用';
+    addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '账号管理', action: 'toggle', actionLabel: newStatus, targetType: 'account', targetId: id, targetName: account?.username || '', changes: [{ field: 'status', fieldLabel: '状态', before: account?.status === 'active' ? '启用' : '停用', after: newStatus }], result: 'success' });
     message.success('状态已更新');
   };
 
   const resetPassword = (account: Account) => {
+    addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '账号管理', action: 'reset_pwd', actionLabel: '重置密码', targetType: 'account', targetId: account.id, targetName: account.username, result: 'success' });
     message.success(`已重置 ${account.username} 的密码为默认密码`);
   };
 
   const handleDelete = (id: string) => {
+    const account = accounts.find((a) => a.id === id);
     setAccounts((prev) => {
       const childIds = new Set<string>();
       childIds.add(id);
@@ -84,6 +93,7 @@ export default function AccountList() {
       }
       return prev.filter((a) => !childIds.has(a.id));
     });
+    addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '账号管理', action: 'delete', actionLabel: '删除', targetType: 'account', targetId: id, targetName: account?.username || '', result: 'success' });
     message.success('账号已删除');
   };
 
@@ -112,6 +122,7 @@ export default function AccountList() {
         createdAt: new Date().toISOString().split('T')[0],
       };
       setAccounts((prev) => [...prev, newAccount]);
+      addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '账号管理', action: 'create', actionLabel: '新增', targetType: 'account', targetId: newAccount.id, targetName: newAccount.username, result: 'success' });
       setModalOpen(false);
       form.resetFields();
       setParentAccount(null);
@@ -137,6 +148,14 @@ export default function AccountList() {
           a.id === editingAccount.id ? { ...a, name: values.name, roleId: values.roleId } : a
         )
       );
+      const changes: { field: string; fieldLabel: string; before: string | null; after: string | null }[] = [];
+      if (values.name !== editingAccount.name) changes.push({ field: 'name', fieldLabel: '姓名', before: editingAccount.name, after: values.name });
+      if (values.roleId !== editingAccount.roleId) {
+        const oldRole = roles.find((r) => r.id === editingAccount.roleId);
+        const newRole = roles.find((r) => r.id === values.roleId);
+        changes.push({ field: 'roleId', fieldLabel: '角色', before: oldRole?.name || '未分配', after: newRole?.name || '未分配' });
+      }
+      addLog({ operatorId: user?.id || '', operatorName: user?.name || '', module: '账号管理', action: 'update', actionLabel: '修改', targetType: 'account', targetId: editingAccount.id, targetName: editingAccount.username, changes, result: 'success' });
       setEditModalOpen(false);
       setEditingAccount(null);
       editForm.resetFields();
