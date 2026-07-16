@@ -170,8 +170,7 @@ export default function Dashboard() {
     }
     return [...byChannel.entries()]
       .map(([name, amount]) => ({ name, amount, share: total > 0 ? (amount / total) * 100 : 0 }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5);
+      .sort((a, b) => b.amount - a.amount);
   }, [isAdmin]);
 
   return (
@@ -227,7 +226,11 @@ export default function Dashboard() {
           </Col>
           {isAdmin && (
             <Col span={24}>
-              <Card title="渠道商业绩排行" styles={{ body: { paddingTop: 4, paddingBottom: 4 } }}>
+              <Card
+                title="渠道商业绩"
+                extra={<span style={{ fontSize: 12, color: '#999' }}>按收入从高到低</span>}
+                styles={{ body: { paddingTop: 4, paddingBottom: 4 } }}
+              >
                 {ranking.map((r, i) => (
                   <div
                     key={r.name}
@@ -238,23 +241,7 @@ export default function Dashboard() {
                       borderBottom: i === ranking.length - 1 ? 'none' : '1px solid #f0f0f0',
                     }}
                   >
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        lineHeight: '22px',
-                        borderRadius: '50%',
-                        textAlign: 'center',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        flexShrink: 0,
-                        background: i < 3 ? '#314659' : '#f0f0f0',
-                        color: i < 3 ? '#fff' : '#666',
-                      }}
-                    >
-                      {i + 1}
-                    </span>
-                    <span style={{ flex: 1, marginLeft: 12, fontSize: 14 }}>{r.name}</span>
+                    <span style={{ flex: 1, fontSize: 14 }}>{r.name}</span>
                     <span style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: 14, color: '#333', fontVariantNumeric: 'tabular-nums' }}>
                         ¥{r.amount.toFixed(2)}
