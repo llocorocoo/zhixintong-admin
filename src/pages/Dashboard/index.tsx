@@ -226,30 +226,28 @@ export default function Dashboard() {
           </Col>
           {isAdmin && (
             <Col span={24}>
-              <Card
-                title="渠道商业绩"
-                extra={<span style={{ fontSize: 12, color: '#999' }}>按收入从高到低</span>}
-                styles={{ body: { paddingTop: 4, paddingBottom: 4 } }}
-              >
-                {ranking.map((r, i) => (
-                  <div
-                    key={r.name}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '10px 0',
-                      borderBottom: i === ranking.length - 1 ? 'none' : '1px solid #f0f0f0',
-                    }}
-                  >
-                    <span style={{ flex: 1, fontSize: 14 }}>{r.name}</span>
-                    <span style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 14, color: '#333', fontVariantNumeric: 'tabular-nums' }}>
-                        ¥{r.amount.toFixed(2)}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#999' }}>占比 {r.share.toFixed(1)}%</div>
-                    </span>
-                  </div>
-                ))}
+              <Card title="渠道商收入" styles={{ body: { paddingTop: 4, paddingBottom: 4 } }}>
+                <div style={{ maxHeight: 264, overflowY: 'auto' }}>
+                  {ranking.map((r, i) => (
+                    <div
+                      key={r.name}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '10px 0',
+                        borderBottom: i === ranking.length - 1 ? 'none' : '1px solid #f0f0f0',
+                      }}
+                    >
+                      <span style={{ flex: 1, fontSize: 14 }}>{r.name}</span>
+                      <span style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 14, color: '#333', fontVariantNumeric: 'tabular-nums' }}>
+                          ¥{r.amount.toFixed(2)}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#999' }}>占比 {r.share.toFixed(1)}%</div>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </Card>
             </Col>
           )}
