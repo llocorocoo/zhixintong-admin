@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Badge, Card, Col, Empty, Progress, Row, Statistic } from 'antd';
+import { Badge, Card, Col, Empty, Row, Statistic } from 'antd';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -163,15 +163,16 @@ export default function Dashboard() {
   const ranking = useMemo(() => {
     if (!isAdmin) return [];
     const byChannel = new Map<string, number>();
+    let total = 0;
     for (const t of mockTransactions.filter((t: Transaction) => t.type === 'income')) {
       byChannel.set(t.channelName, (byChannel.get(t.channelName) ?? 0) + t.amount);
+      total += t.amount;
     }
     return [...byChannel.entries()]
-      .map(([name, amount]) => ({ name, amount }))
+      .map(([name, amount]) => ({ name, amount, share: total > 0 ? (amount / total) * 100 : 0 }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5);
   }, [isAdmin]);
-  const rankingMax = ranking[0]?.amount ?? 1;
 
   return (
     <Row gutter={[16, 16]}>
@@ -226,17 +227,40 @@ export default function Dashboard() {
           </Col>
           {isAdmin && (
             <Col span={24}>
-              <Card title="渠道商业绩排行" styles={{ body: { paddingTop: 12, paddingBottom: 12 } }}>
+              <Card title="渠道商业绩排行" styles={{ body: { paddingTop: 4, paddingBottom: 4 } }}>
                 {ranking.map((r, i) => (
-                  <div key={r.name} style={{ marginBottom: i === ranking.length - 1 ? 0 : 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 2 }}>
-                      <span>
-                        <span style={{ color: i < 3 ? '#1677ff' : '#999', fontWeight: 600, marginRight: 8 }}>{i + 1}</span>
-                        {r.name}
-                      </span>
-                      <span style={{ color: '#666' }}>¥{r.amount.toFixed(2)}</span>
-                    </div>
-                    <Progress percent={(r.amount / rankingMax) * 100} showInfo={false} size="small" />
+                  <div
+                    key={r.name}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '10px 0',
+                      borderBottom: i === ranking.length - 1 ? 'none' : '1px solid #f0f0f0',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 22,
+                        height: 22,
+                        lineHeight: '22px',
+                        borderRadius: '50%',
+                        textAlign: 'center',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        background: i < 3 ? '#314659' : '#f0f0f0',
+                        color: i < 3 ? '#fff' : '#666',
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <span style={{ flex: 1, marginLeft: 12, fontSize: 14 }}>{r.name}</span>
+                    <span style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, color: '#333', fontVariantNumeric: 'tabular-nums' }}>
+                        ¥{r.amount.toFixed(2)}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#999' }}>占比 {r.share.toFixed(1)}%</div>
+                    </span>
                   </div>
                 ))}
               </Card>
