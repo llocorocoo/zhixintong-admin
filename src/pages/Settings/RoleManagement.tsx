@@ -389,7 +389,7 @@ export default function RoleManagement() {
         destroyOnClose
       >
         <p style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>
-          选中左侧账号点击 &gt; 可分配该角色，选中右侧账号点击 &lt; 可移除该角色
+          从左侧选择账号添加到右侧，右侧账号将绑定角色「{assigningRole?.name}」
         </p>
         <Transfer
           dataSource={allAccounts.map((a) => ({ key: a.key, title: `${a.name}（${a.username}）` }))}
@@ -400,8 +400,6 @@ export default function RoleManagement() {
           showSearch
           listStyle={{ width: 260, height: 320 }}
           locale={{ itemUnit: '个', itemsUnit: '个', searchPlaceholder: '搜索账号' }}
-          operations={['分配所选账号', '移除所选账号']}
-          operationStyle={{ display: 'flex', flexDirection: 'column', gap: 8 }}
         />
       </Modal>
     </>
