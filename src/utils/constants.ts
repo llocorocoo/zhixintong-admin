@@ -19,6 +19,30 @@ export const CHANNEL_TYPE_MAP: Record<string, string> = {
   oem: 'OEM',
 };
 
+// 反馈类型：正式环境改由「字典管理」维护，运营可自行增减
+export const FEEDBACK_TYPE_MAP: Record<string, { text: string; color: string }> = {
+  bug: { text: '功能异常', color: 'red' },
+  report_error: { text: '报告内容有误', color: 'volcano' },
+  billing: { text: '收费与退款', color: 'gold' },
+  suggestion: { text: '产品建议', color: 'blue' },
+  other: { text: '其他', color: 'default' },
+};
+
+export const FEEDBACK_STATUS_MAP: Record<string, { text: string; color: string }> = {
+  pending: { text: '待处理', color: 'red' },
+  processing: { text: '处理中', color: 'orange' },
+  replied: { text: '已回复', color: 'green' },
+  closed: { text: '已关闭', color: 'default' },
+  ignored: { text: '已忽略', color: 'default' },
+};
+
+// 回复触达方式：一期仅站内信可用，其余等「通知配置」开通
+export const REPLY_CHANNEL_MAP: Record<string, { text: string; enabled: boolean }> = {
+  notice: { text: '站内信', enabled: true },
+  sms: { text: '短信', enabled: false },
+  wechat: { text: '公众号', enabled: false },
+};
+
 export const TRANSACTION_TYPE_MAP: Record<string, { text: string; color: string }> = {
   income: { text: '收入', color: 'green' },
   refund: { text: '退款', color: 'red' },

@@ -4,14 +4,17 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useOperationLog } from '@/store/useOperationLog';
 import type { OperationLog } from '@/store/useOperationLog';
 
-const MODULE_OPTIONS = ['账号管理', '角色管理', '渠道管理', '订单管理'];
+const MODULE_OPTIONS = ['账号管理', '角色管理', '渠道管理', '订单管理', '用户反馈'];
 const ACTION_OPTIONS = [
   { value: 'create', label: '新增' },
   { value: 'update', label: '修改' },
   { value: 'delete', label: '删除' },
-  { value: 'assign', label: '分配账号' },
+  { value: 'assign', label: '分配账号/指派' },
   { value: 'toggle', label: '启用/停用' },
   { value: 'reset_pwd', label: '重置密码' },
+  { value: 'reply', label: '回复' },
+  { value: 'close', label: '关闭' },
+  { value: 'ignore', label: '忽略' },
 ];
 
 const ACTION_COLORS: Record<string, string> = {
@@ -21,6 +24,9 @@ const ACTION_COLORS: Record<string, string> = {
   assign: 'purple',
   toggle: 'cyan',
   reset_pwd: 'gold',
+  reply: 'green',
+  close: 'default',
+  ignore: 'default',
 };
 
 export default function OperationLogPage() {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Button, Dropdown, Avatar, Badge } from 'antd';
 import {
   TeamOutlined,
   UserOutlined,
@@ -22,6 +22,7 @@ import type { MenuProps } from 'antd';
 import { useAuth } from '@/store/useAuth';
 import { useTheme } from '@/store/useTheme';
 import { useMenus } from '@/store/useMenus';
+import { useFeedback } from '@/store/useFeedback';
 import { usePermission } from '@/hooks/usePermission';
 import { renderMenuIcon } from '@/utils/menuIcons';
 import type { Permission, SysMenu } from '@/types';
@@ -41,6 +42,8 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/channel-mgmt': { title: '渠道管理' },
   '/order': { title: '订单管理' },
   '/transaction': { title: '交易明细' },
+  '/message': { title: '消息中心' },
+  '/message/feedback': { title: '用户反馈', parent: '/message' },
   '/settings': { title: '系统配置' },
   '/settings/permission-group': { title: '权限分组管理', parent: '/settings' },
   '/settings/permission-item': { title: '权限项管理', parent: '/settings' },
@@ -49,6 +52,7 @@ const breadcrumbMap: Record<string, BreadcrumbItem> = {
   '/settings/menu': { title: '菜单管理', parent: '/settings' },
   '/settings/dict': { title: '字典管理', parent: '/settings' },
   '/settings/notification': { title: '通知配置', parent: '/settings' },
+  '/settings/operation-log': { title: '操作日志', parent: '/settings' },
   '/channel-settings': { title: '账号管理' },
   '/channel-settings/role': { title: '角色管理', parent: '/channel-settings' },
   '/channel-settings/staff': { title: '员工管理', parent: '/channel-settings' },
@@ -76,6 +80,7 @@ function buildAdminMenuItems(
   menus: SysMenu[],
   hasPermission: (p: Permission) => boolean,
   isSuperAdmin: boolean,
+  pendingFeedback: number,
 ): MenuProps['items'] {
   const sorted = [...menus].sort((a, b) => a.orderNum - b.orderNum);
   const byParent = new Map<string | null, SysMenu[]>();
@@ -94,13 +99,17 @@ function buildAdminMenuItems(
       if (m.perms && !hasPermission(m.perms)) continue;
 
       const children = build(m.id);
+      // 用户反馈带待处理数量红点，运营不用进页面就知道有没有积压
+      const label = m.path === '/message/feedback' && pendingFeedback > 0
+        ? <span>{m.name}<Badge count={pendingFeedback} size="small" style={{ marginLeft: 8 }} /></span>
+        : m.name;
       if (m.menuType === 'M') {
         if (children.length === 0) continue; // 空目录不显示
-        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name, children });
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label, children });
       } else if (children.length > 0) {
-        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name, children });
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label, children });
       } else {
-        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label: m.name });
+        result.push({ key: m.path || m.id, icon: renderMenuIcon(m.icon), label });
       }
     }
     return result;
@@ -156,6 +165,7 @@ function getSelectedKey(pathname: string): string {
   if (pathname.startsWith('/settings/notification')) return pathname;
   if (pathname.startsWith('/settings/operation-log')) return '/settings/operation-log';
   if (pathname === '/settings') return '/settings/permission-group';
+  if (pathname.startsWith('/message')) return '/message/feedback';
   if (pathname.startsWith('/channel-settings/')) return pathname;
   if (pathname === '/account') return '/account';
   if (pathname.startsWith('/channel/my')) return '/channel/my';
@@ -168,6 +178,7 @@ function getSelectedKey(pathname: string): string {
 function getOpenKeys(pathname: string): string[] {
   const keys: string[] = [];
   if (pathname.startsWith('/user-center')) keys.push('/user-center');
+  if (pathname.startsWith('/message')) keys.push('/message');
   if (pathname.startsWith('/channel-settings')) keys.push('/channel-settings');
   else if (pathname.startsWith('/channel') || pathname.startsWith('/account')) keys.push('/channel-mgmt');
   if (pathname.startsWith('/settings')) {
@@ -187,7 +198,11 @@ export default function AppLayout() {
   const { menus } = useMenus();
   const { hasPermission, isSuperAdmin } = usePermission();
 
-  const menuItems = user?.role === 'admin' ? buildAdminMenuItems(menus, hasPermission, isSuperAdmin) : buildChannelMenuItems(hasPermission);
+  const pendingFeedback = useFeedback((s) => s.feedbacks.filter((f) => f.status === 'pending').length);
+
+  const menuItems = user?.role === 'admin'
+    ? buildAdminMenuItems(menus, hasPermission, isSuperAdmin, pendingFeedback)
+    : buildChannelMenuItems(hasPermission);
 
   useEffect(() => {
     setOpenKeys((prev) => {

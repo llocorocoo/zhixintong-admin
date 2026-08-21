@@ -20,6 +20,7 @@ import UserCenter from '@/pages/UserCenter';
 import Profile from '@/pages/UserCenter/Profile';
 import DictManagement from '@/pages/Settings/DictManagement';
 import AdminAccount from '@/pages/UserCenter/AdminAccount';
+import FeedbackList from '@/pages/Feedback';
 import ChannelRoleManagement from '@/pages/Channel/RoleManagement';
 import StaffManagement from '@/pages/Channel/StaffManagement';
 
@@ -40,6 +41,9 @@ const router = createBrowserRouter([
       { path: 'account', element: <AuthGuard roles={['admin']}><AccountList /></AuthGuard> },
       { path: 'order', element: <OrderList /> },
       { path: 'transaction', element: <TransactionList /> },
+      // 用户反馈：入站消息，仅平台管理员可见（渠道商不开放）
+      { path: 'message', element: <Navigate to="/message/feedback" replace /> },
+      { path: 'message/feedback', element: <AuthGuard roles={['admin']}><FeedbackList /></AuthGuard> },
       {
         path: 'settings',
         element: <AuthGuard roles={['admin']}><SettingsLayout /></AuthGuard>,

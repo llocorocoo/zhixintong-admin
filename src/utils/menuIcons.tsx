@@ -18,6 +18,8 @@ import {
   ProfileOutlined,
   ThunderboltOutlined,
   TagsOutlined,
+  MessageOutlined,
+  CommentOutlined,
 } from '@ant-design/icons';
 
 // 图标名 → 图标元素。菜单数据只存字符串名，渲染时映射为组件（可持久化到 localStorage）。
@@ -40,6 +42,8 @@ export const MENU_ICONS: Record<string, ReactNode> = {
   Profile: <ProfileOutlined />,
   Thunderbolt: <ThunderboltOutlined />,
   Tags: <TagsOutlined />,
+  Message: <MessageOutlined />,
+  Comment: <CommentOutlined />,
 };
 
 export const MENU_ICON_OPTIONS = Object.keys(MENU_ICONS);

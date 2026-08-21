@@ -19,7 +19,15 @@ const DEFAULT_MENUS: SysMenu[] = [
   { id: 'm_order', parentId: null, name: '订单管理', menuType: 'C', path: '/order', icon: 'ShoppingCart', perms: 'order:view', orderNum: 3, visible: true, status: 'active', system: true },
   { id: 'm_transaction', parentId: null, name: '交易明细', menuType: 'C', path: '/transaction', icon: 'Transaction', perms: 'transaction:view', orderNum: 4, visible: true, status: 'active', system: true },
 
-  { id: 'm_settings', parentId: null, name: '系统配置', menuType: 'M', path: '/settings', icon: 'Setting', perms: 'settings:view', orderNum: 5, visible: true, status: 'active', system: true },
+  // 消息中心：入站（用户反馈）与出站（站内信，待建）分开的两个工作台
+  { id: 'm_message', parentId: null, name: '消息中心', menuType: 'M', path: '/message', icon: 'Message', orderNum: 5, visible: true, status: 'active', system: true },
+  { id: 'm_feedback', parentId: 'm_message', name: '用户反馈', menuType: 'C', path: '/message/feedback', icon: 'Comment', perms: 'feedback:view', orderNum: 1, visible: true, status: 'active', system: true },
+  { id: 'm_feedback_assign', parentId: 'm_feedback', name: '指派处理人', menuType: 'F', perms: 'feedback:assign', orderNum: 1, visible: true, status: 'active', system: true },
+  { id: 'm_feedback_reply', parentId: 'm_feedback', name: '回复反馈', menuType: 'F', perms: 'feedback:reply', orderNum: 2, visible: true, status: 'active', system: true },
+  { id: 'm_feedback_close', parentId: 'm_feedback', name: '关闭/忽略', menuType: 'F', perms: 'feedback:close', orderNum: 3, visible: true, status: 'active', system: true },
+  { id: 'm_feedback_export', parentId: 'm_feedback', name: '导出反馈', menuType: 'F', perms: 'feedback:export', orderNum: 4, visible: true, status: 'active', system: true },
+
+  { id: 'm_settings', parentId: null, name: '系统配置', menuType: 'M', path: '/settings', icon: 'Setting', perms: 'settings:view', orderNum: 6, visible: true, status: 'active', system: true },
   { id: 'm_permission', parentId: 'm_settings', name: '权限配置', menuType: 'M', path: '/settings/permission', icon: 'SafetyCertificate', orderNum: 1, visible: true, status: 'active', system: true },
   { id: 'm_perm_group', parentId: 'm_permission', name: '权限分组管理', menuType: 'C', path: '/settings/permission-group', orderNum: 1, visible: true, status: 'active', system: true },
   { id: 'm_perm_item', parentId: 'm_permission', name: '权限项管理', menuType: 'C', path: '/settings/permission-item', orderNum: 2, visible: true, status: 'active', system: true },
@@ -34,11 +42,12 @@ const DEFAULT_MENUS: SysMenu[] = [
   { id: 'm_notification', parentId: 'm_settings', name: '通知配置', menuType: 'C', path: '/settings/notification', icon: 'Bell', orderNum: 6, visible: true, status: 'active', system: true },
   { id: 'm_operation_log', parentId: 'm_settings', name: '操作日志', menuType: 'C', path: '/settings/operation-log', icon: 'FileText', orderNum: 7, visible: true, status: 'active', system: true },
 
-  { id: 'm_user_center', parentId: null, name: '个人设置', menuType: 'M', path: '/user-center', icon: 'Idcard', orderNum: 6, visible: true, status: 'active', system: true },
+  { id: 'm_user_center', parentId: null, name: '个人设置', menuType: 'M', path: '/user-center', icon: 'Idcard', orderNum: 7, visible: true, status: 'active', system: true },
   { id: 'm_profile', parentId: 'm_user_center', name: '基本信息', menuType: 'C', path: '/user-center/profile', orderNum: 1, visible: true, status: 'active', system: true },
 ];
 
-const STORAGE_KEY = 'zxt_admin_menus_v3';
+// 默认菜单有新增节点时递增版本号，避免旧缓存把新菜单挡住
+const STORAGE_KEY = 'zxt_admin_menus_v4';
 
 function loadMenus(): SysMenu[] {
   const saved = localStorage.getItem(STORAGE_KEY);

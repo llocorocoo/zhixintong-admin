@@ -49,6 +49,11 @@ export type Permission =
   | 'admin_account:edit'
   | 'admin_account:toggle'
   | 'admin_account:reset_pwd'
+  | 'feedback:view'
+  | 'feedback:assign'
+  | 'feedback:reply'
+  | 'feedback:close'
+  | 'feedback:export'
   | 'my_channel:view';
 
 export const ALL_PERMISSIONS: Permission[] = [
@@ -69,6 +74,11 @@ export const ALL_PERMISSIONS: Permission[] = [
   'admin_account:edit',
   'admin_account:toggle',
   'admin_account:reset_pwd',
+  'feedback:view',
+  'feedback:assign',
+  'feedback:reply',
+  'feedback:close',
+  'feedback:export',
 ];
 
 export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label: string; desc: string }[] }[] = [
@@ -102,6 +112,16 @@ export const PERMISSION_GROUPS: { group: string; items: { key: Permission; label
     group: '交易明细',
     items: [
       { key: 'transaction:view', label: '查看交易', desc: '查看交易明细' },
+    ],
+  },
+  {
+    group: '用户反馈',
+    items: [
+      { key: 'feedback:view', label: '查看用户反馈', desc: '查看反馈列表和详情' },
+      { key: 'feedback:assign', label: '指派处理人', desc: '将反馈指派给指定处理人' },
+      { key: 'feedback:reply', label: '回复反馈', desc: '回复用户并触达（站内信）' },
+      { key: 'feedback:close', label: '关闭/忽略反馈', desc: '关闭已处理反馈或忽略无效反馈' },
+      { key: 'feedback:export', label: '导出反馈', desc: '导出反馈记录为 Excel' },
     ],
   },
   {
@@ -204,6 +224,43 @@ export interface Transaction {
   channelId: string;
   channelName: string;
   createdAt: string;
+}
+
+// ============ 用户反馈（C 端用户 → 平台，入站）============
+// 与「站内信」（平台 → 用户，出站）分开建模，两者唯一交叉点是：
+// 回复反馈时生成一条 bizType='feedback_reply' 的站内信推给用户。
+export type FeedbackType = 'bug' | 'report_error' | 'billing' | 'suggestion' | 'other';
+
+export type FeedbackStatus = 'pending' | 'processing' | 'replied' | 'closed' | 'ignored';
+
+// 回复触达方式：一期仅站内信，短信/公众号先占位（通知配置里开通后启用）
+export type ReplyChannel = 'notice' | 'sms' | 'wechat';
+
+export interface Feedback {
+  id: string;
+  feedbackNo: string;           // 反馈编号，便于客服口头核对
+  userId: string;
+  userNickname: string;
+  userPhone: string;            // 列表页脱敏展示
+  channelId: string;            // 来源渠道，用于按渠道统计问题
+  channelName: string;
+  type: FeedbackType;
+  content: string;
+  images?: string[];            // 截图附件
+  relatedOrderNo?: string;      // 关联订单/报告
+  contactInfo?: string;         // 用户留的联系方式（选填）
+  clientInfo?: string;          // 端/版本/机型
+  status: FeedbackStatus;
+  handlerId?: string;
+  handlerName?: string;
+  replyContent?: string;
+  replyChannel?: ReplyChannel;
+  replyAt?: string;
+  replyBy?: string;
+  internalRemark?: string;      // 内部备注，仅后台可见
+  satisfaction?: number;        // 用户对回复的评价 1-5（预留，C 端暂未开放）
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Account {
