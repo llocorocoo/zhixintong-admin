@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Table, Tag, Tabs, Input, Select, DatePicker, Form, Button, Row, Col, Card, Statistic,
   Drawer, Descriptions, Image, Radio, Rate, Space, Tooltip, Popconfirm, Typography, message, Divider,
@@ -42,6 +42,9 @@ export default function FeedbackList() {
   const [replyText, setReplyText] = useState('');
   const [replyChannel, setReplyChannel] = useState<ReplyChannel>('notice');
   const [remarkText, setRemarkText] = useState('');
+  // 「回复」入口打开抽屉后直接定位到回复框，「详情」则停在顶部先看内容
+  const [jumpToReply, setJumpToReply] = useState(false);
+  const replyBoxRef = useRef<HTMLDivElement>(null);
 
   const detail = feedbacks.find((f) => f.id === detailId) ?? null;
 
@@ -96,11 +99,24 @@ export default function FeedbackList() {
     setDateRange(null);
   };
 
-  const openDetail = (record: Feedback) => {
+  const openDetail = (record: Feedback, toReply = false) => {
     setDetailId(record.id);
     setReplyText(record.replyContent ?? '');
     setReplyChannel(record.replyChannel ?? 'notice');
     setRemarkText(record.internalRemark ?? '');
+    setJumpToReply(toReply);
+  };
+
+  // 抽屉动画结束后再滚动/聚焦，否则元素还没定位好
+  const handleDrawerOpenChange = (open: boolean) => {
+    if (!open) {
+      setJumpToReply(false);
+      return;
+    }
+    if (jumpToReply) {
+      replyBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      replyBoxRef.current?.querySelector('textarea')?.focus();
+    }
   };
 
   const log = (action: string, actionLabel: string, target: Feedback, remark?: string) => {
@@ -216,7 +232,7 @@ export default function FeedbackList() {
         <Space size={4}>
           <a onClick={() => openDetail(r)}>详情</a>
           {canReply && r.status !== 'closed' && r.status !== 'ignored' && (
-            <a onClick={() => openDetail(r)}>回复</a>
+            <a onClick={() => openDetail(r, true)}>{r.replyAt ? '追加回复' : '回复'}</a>
           )}
         </Space>
       ),
@@ -350,6 +366,7 @@ export default function FeedbackList() {
         title={detail ? `反馈详情 · ${detail.feedbackNo}` : '反馈详情'}
         open={!!detail}
         onClose={() => setDetailId(null)}
+        afterOpenChange={handleDrawerOpenChange}
         width={760}
         extra={detail && <Tag color={FEEDBACK_STATUS_MAP[detail.status].color}>{FEEDBACK_STATUS_MAP[detail.status].text}</Tag>}
         footer={detail && (
@@ -447,49 +464,51 @@ export default function FeedbackList() {
 
             <Divider />
 
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>回复用户</div>
-            {detail.replyAt && (
-              <Card size="small" style={{ marginBottom: 12 }}>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 6 }}>
-                  {detail.replyBy} 于 {detail.replyAt} 通过
-                  {REPLY_CHANNEL_MAP[detail.replyChannel ?? 'notice'].text}回复
-                </div>
-                <div style={{ whiteSpace: 'pre-wrap' }}>{detail.replyContent}</div>
-              </Card>
-            )}
+            <div ref={replyBoxRef}>
+              <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>回复用户</div>
+              {detail.replyAt && (
+                <Card size="small" style={{ marginBottom: 12 }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 6 }}>
+                    {detail.replyBy} 于 {detail.replyAt} 通过
+                    {REPLY_CHANNEL_MAP[detail.replyChannel ?? 'notice'].text}回复
+                  </div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{detail.replyContent}</div>
+                </Card>
+              )}
 
-            <Input.TextArea
-              rows={4}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder={canReply ? '回复内容将以站内信形式推送给用户，请注意用语规范' : '无回复权限'}
-              maxLength={1000}
-              showCount
-              disabled={!canReply}
-            />
-
-            <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-              <Radio.Group
-                value={replyChannel}
-                onChange={(e) => setReplyChannel(e.target.value)}
+              <Input.TextArea
+                rows={4}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={canReply ? '回复内容将以站内信形式推送给用户，请注意用语规范' : '无回复权限'}
+                maxLength={1000}
+                showCount
                 disabled={!canReply}
-              >
-                {Object.entries(REPLY_CHANNEL_MAP).map(([value, cfg]) => (
-                  <Radio key={value} value={value} disabled={!cfg.enabled}>
-                    {cfg.enabled ? cfg.text : (
-                      <Tooltip title="需在「通知配置」中开通后启用">
-                        <span>{cfg.text}</span>
-                      </Tooltip>
-                    )}
-                  </Radio>
-                ))}
-              </Radio.Group>
-              <Space>
-                <Button onClick={() => handleReply(true)} disabled={!canReply || !canClose}>回复并关闭</Button>
-                <Button type="primary" onClick={() => handleReply(false)} disabled={!canReply}>
-                  {detail.replyAt ? '再次回复' : '提交回复'}
-                </Button>
-              </Space>
+              />
+
+              <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <Radio.Group
+                  value={replyChannel}
+                  onChange={(e) => setReplyChannel(e.target.value)}
+                  disabled={!canReply}
+                >
+                  {Object.entries(REPLY_CHANNEL_MAP).map(([value, cfg]) => (
+                    <Radio key={value} value={value} disabled={!cfg.enabled}>
+                      {cfg.enabled ? cfg.text : (
+                        <Tooltip title="需在「通知配置」中开通后启用">
+                          <span>{cfg.text}</span>
+                        </Tooltip>
+                      )}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+                <Space>
+                  <Button onClick={() => handleReply(true)} disabled={!canReply || !canClose}>回复并关闭</Button>
+                  <Button type="primary" onClick={() => handleReply(false)} disabled={!canReply}>
+                    {detail.replyAt ? '再次回复' : '提交回复'}
+                  </Button>
+                </Space>
+              </div>
             </div>
           </>
         )}
